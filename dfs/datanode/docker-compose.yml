@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  datanode:
+    image:
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - 10000:10000

@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  namenode:
+    image:
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - 9000:9000
