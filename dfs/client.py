@@ -7,7 +7,7 @@ namenode = '0.0.0.0'
 
 def request(s: str, args='', show=True):
     try:
-        result = requests.get(f'http://{namenode}:8080/' + s, json=args)
+        result = requests.get(f'http://{namenode}:5555/' + s, json=args)
         if show:
             print(result.json()['msg'])
         return result.json()['msg']
@@ -20,7 +20,8 @@ def print_help():
     hello - just hello
     """)
 
-
+def read_file():
+    pass
 def main():
     args = sys.argv[1:]
     if len(args) == 0:
@@ -30,8 +31,16 @@ def main():
             print_help()
         elif args[0] == 'hello':
             request('hello')
+        elif args[0] == 'init':
+            request('init')
         else:
             print("Incorrect command!\nFor help write command: help")
+    elif len(args) == 2:
+        if args[0] == 'create':
+            request('create', args=args[1])
+        else:
+            print("Incorrect command!\nFor help write command: help")
+
 
 
 if __name__ == '__main__':
