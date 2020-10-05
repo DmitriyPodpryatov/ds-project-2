@@ -5,6 +5,6 @@ COPY . /namenode
 
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
-EXPOSE 9000
+EXPOSE 5555
 
 CMD ["python", "namenode.py"]

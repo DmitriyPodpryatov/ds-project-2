@@ -20,8 +20,11 @@ def print_help():
     hello - just hello
     """)
 
+
 def read_file():
     pass
+
+
 def main():
     args = sys.argv[1:]
     if len(args) == 0:
@@ -40,7 +43,6 @@ def main():
             request('create', args=args[1])
         else:
             print("Incorrect command!\nFor help write command: help")
-
 
 
 if __name__ == '__main__':

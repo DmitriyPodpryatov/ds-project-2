@@ -2,9 +2,10 @@ version: '3'
 
 services:
   datanode:
-    image:
+    #    image:
+    build: .
     deploy:
       restart_policy:
         condition: on-failure
     ports:
-      - 10000:10000
+      - 7777:7777

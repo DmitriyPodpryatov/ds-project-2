@@ -5,6 +5,6 @@ COPY . /datanode
 
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
-EXPOSE 10000
+EXPOSE 7777
 
 CMD ["python", "datanode.py"]

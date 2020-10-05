@@ -4,28 +4,67 @@ Students: **Lev Svalov**, **Dmitry Podpryatov**
 
 Group: **DS-02**
 
-## Docker Swarm
+## Distributed File System
 
-Create docker-machines
+### Storage Servers aka Datanodes
 
-```
-docker-machine create --driver virtualbox Namenode
-docker-machine create --driver virtualbox Datanode-1
-docker-machine create --driver virtualbox Datanode-2
-docker-machine ls
-```
-
-Initialize docker swarm and add servers
+Copy `dfs/datanode` folder to the machine
 
 ```
-docker-machine ssh Namenode
-docker swarm init --advertise-addr <IP>
+scp -r dfs/datanode user@IP:
+```
 
-docker-machine ssh Datanode-1
-docker swarm join --token <token> <IP>
+Or
 
-docker-machine ssh Datanode-2
-docker swarm join --token <token> <IP>
+```
+git clone https://github.com/DmitriyPodpryatov/ds-project-2.git
+cd ds-project-2/datanode
+```
 
-docker node ls
+Run
+
+```
+docker-compose up --build
+```
+
+### Naming Server aka Namenode
+
+Copy `dfs/namenode` folder to the machine
+
+```
+scp -r dfs/namenode user@IP:
+```
+
+Or
+
+```
+git clone https://github.com/DmitriyPodpryatov/ds-project-2.git
+cd ds-project-2/namenode
+```
+
+Run
+
+```
+docker-compose up --build
+```
+
+### Client
+
+Copy `client` folder on the machine(s)
+
+```
+scp -r client user@IP:
+```
+
+Or
+
+```
+git clone https://github.com/DmitriyPodpryatov/ds-project-2.git
+cd client
+```
+
+Run
+
+```
+python3 client.py <args>
 ```
