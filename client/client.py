@@ -2,7 +2,6 @@ import sys
 import requests
 import os
 
-# namenode = '3.134.106.190'
 
 namenode = "10.0.15.10"
 
@@ -10,12 +9,7 @@ def request(s: str, args='', show=True):
     try:
         result = requests.get(f'http://{namenode}:5555/' + s, json=args)
         if show:
-            print("SOOO:")
-            print(result.headers)
-            print("---")
-            print(result["response"])
-            print("---")
-            print(result.json()['msg'])
+            print(result.text)
         return result.json()['msg']
     except Exception as e:
         print(e)
