@@ -10,6 +10,9 @@ def request(s: str, args='', show=True):
     try:
         result = requests.get(f'http://{namenode}:5555/' + s, json=args)
         if show:
+            print("SOOO:")
+            print(result)
+            print("---")
             print(result.json()['msg'])
         return result.json()['msg']
     except Exception as e:

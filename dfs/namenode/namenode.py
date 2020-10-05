@@ -6,15 +6,16 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-# datanodes = ["3.16.213.82:7777", "18.216.176.176:7777", "3.134.115.22:7777"]
+
 datanodes = ["10.0.15.11:7777","10.0.15.12:7777","10.0.15.13:7777"]
 
 @app.route('/hello')
 def hello():
-    print("Hello from namenode")
+    res = ""
     for datanode in datanodes:
-        requests.get("http://" + datanode + "/hello")
-    return Response(status=200)
+        res += requests.get("http://" + datanode + "/hello") + "\n--\n"
+
+    return Response(status=200, response="Hello from namenode\n"+res)
 
 
 if __name__ == '__main__':

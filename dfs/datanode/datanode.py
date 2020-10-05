@@ -9,8 +9,7 @@ CORS(app)
 
 @app.route('/hello')
 def hello():
-    print("Hello from datanode!")
-    return Response(status=200)
+    return Response(status=200, response="Hello from datanode!")
 
 
 if __name__ == '__main__':
