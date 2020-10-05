@@ -6,7 +6,7 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-datanodes = ["0.0.0.0:7777", '3.129.14.225:7777']
+datanodes = ["3.16.213.82:7777", "18.216.176.176:7777", "3.134.115.22:7777"]
 
 
 @app.route('/hello')

@@ -2,7 +2,7 @@ import sys
 import requests
 import os
 
-namenode = '0.0.0.0'
+namenode = '3.134.106.190'
 
 
 def request(s: str, args='', show=True):
