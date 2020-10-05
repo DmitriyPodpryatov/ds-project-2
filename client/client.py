@@ -11,7 +11,9 @@ def request(s: str, args='', show=True):
         result = requests.get(f'http://{namenode}:5555/' + s, json=args)
         if show:
             print("SOOO:")
-            print(result)
+            print(result.headers)
+            print("---")
+            print(result["response"])
             print("---")
             print(result.json()['msg'])
         return result.json()['msg']
