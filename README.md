@@ -18,13 +18,13 @@ Or
 
 ```
 git clone https://github.com/DmitriyPodpryatov/ds-project-2.git
-cd ds-project-2/datanode
+cd ds-project-2/dfs/datanode
 ```
 
 Run
 
 ```
-docker-compose up --build
+sudo docker-compose up --build
 ```
 
 ### Naming Server aka Namenode
@@ -39,13 +39,13 @@ Or
 
 ```
 git clone https://github.com/DmitriyPodpryatov/ds-project-2.git
-cd ds-project-2/namenode
+cd ds-project-2/dfs/namenode
 ```
 
 Run
 
 ```
-docker-compose up --build
+sudo  docker-compose up --build
 ```
 
 ### Client

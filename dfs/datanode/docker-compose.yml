@@ -7,5 +7,9 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
+    volumes:
+      - driver:/dfs
     ports:
       - 7777:7777
+volumes:
+  driver:
