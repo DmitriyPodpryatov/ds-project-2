@@ -2,15 +2,22 @@ import sys
 import requests
 import os
 
-
 namenode = "10.0.15.10"
 
-def request(s: str, args='', show=True):
+
+def request(s: str, params=None, show=True):
+    if params is None:
+        params = {}
+
     try:
-        result = requests.get(f'http://{namenode}:5555/' + s, json=args)
+        # https://requests.readthedocs.io/en/master/user/quickstart/
+        result = requests.get(f'http://{namenode}:5555/' + s, params=params)
+
         if show:
             print(result.text)
+
         return result.json()['msg']
+
     except Exception as e:
         print(e)
 
@@ -18,6 +25,8 @@ def request(s: str, args='', show=True):
 def print_help():
     print("""\nList of available commands:
     hello - just hello
+    init - initialize and prepare DFS. Return available size
+    touch FILE - create empty file FILE
     """)
 
 
@@ -26,21 +35,30 @@ def read_file():
 
 
 def main():
+    # Get args
     args = sys.argv[1:]
+
     if len(args) == 0:
         print("Empty command!")
+
     elif len(args) == 1:
         if args[0] == 'help':
             print_help()
+
         elif args[0] == 'hello':
             request('hello')
+
         elif args[0] == 'init':
             request('init')
+
         else:
             print("Incorrect command!\nFor help write command: help")
+
     elif len(args) == 2:
-        if args[0] == 'create':
-            request('create', args=args[1])
+        # Create file
+        if args[0] == 'touch':
+            request('touch', params={'filename': args[1]})
+
         else:
             print("Incorrect command!\nFor help write command: help")
 

@@ -1,7 +1,7 @@
 from flask import Flask, Response, request
 from flask_cors import CORS
+import os
 import requests
-import json
 
 
 class FileSystem:
@@ -9,8 +9,10 @@ class FileSystem:
         self.root = FileSystem.File('/', is_dir=True, child={})
 
     class File:
-        def __init__(self, name: str, is_dir: bool, parent=None, child: dict = {},
+        def __init__(self, name: str, is_dir: bool, parent=None, child=None,
                      location: [] = None):
+            if child is None:
+                child = {}
             self.name = name
             self.child = child
             self.parent = parent
@@ -56,7 +58,7 @@ class FileSystem:
         current_node = self.root
         for dir in directories:
             current_node = current_node.children.get(dir)
-        if current_node is not None and current_node.is_dir == False:
+        if current_node is not None and not current_node.is_dir:
             return True
         else:
             return False
@@ -65,6 +67,8 @@ class FileSystem:
 app = Flask(__name__)
 CORS(app)
 datanodes = ["10.0.15.11:7777", "10.0.15.12:7777", "10.0.15.13:7777"]
+
+fs: FileSystem
 
 
 @app.route('/hello')
@@ -77,7 +81,9 @@ def hello():
 
 @app.route('/init')
 def init():
+    global fs
     fs = FileSystem()
+
     result = 0
     for datanode in datanodes:
         try:
@@ -87,6 +93,26 @@ def init():
         result += int(response.content.decode())
     storage = "The available storage is " + str(result // 3)
     return Response(status=200, response=storage)
+
+
+@app.route('/touch')
+def touch():
+    # Get params
+    filename = request.args.get('filename')
+
+    # Create file if it does not exists
+    global fs
+    response = 'Failed'
+    if fs and not fs.file_exists(filename):
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/touch", params={'filename': filename})
+            except requests.exceptions.RequestException:
+                continue
+
+        # TODO: create file in the FileSystem
+
+    return Response(status=200, response=response.content)
 
 
 if __name__ == '__main__':

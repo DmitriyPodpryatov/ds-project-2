@@ -24,5 +24,14 @@ def init():
     return Response(status=200, response=str(free).encode())
 
 
+@app.route('/touch')
+def touch():
+    # Get params
+    filename = request.args.get('filename')
+
+    os.system('touch ' + filename)
+    return Response(status=200, response='File created')
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=7777)
