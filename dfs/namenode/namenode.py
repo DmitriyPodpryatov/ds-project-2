@@ -157,7 +157,7 @@ def copy():
     response = 'Failed'
     exists = fs.file_exists(source)
     # if File System is initialized and source file exists
-    if fs and exists is not None and not exists:
+    if fs is not None and exists:
         for datanode in datanodes:
             try:
                 response = requests.get("http://" + datanode + "/copy",
@@ -184,9 +184,9 @@ def info():
     global fs
     response = 'Failed'
 
-    # True (exists), False (doesn't exist), or None (error)
     exists = fs.file_exists(filename)
-    if fs and exists is not None and not exists:
+
+    if fs is not None and exists:
         for datanode in datanodes:
             try:
                 response = requests.get("http://" + datanode + "/info", params={'filename': filename})
