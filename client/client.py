@@ -56,6 +56,8 @@ def main():
             request('touch', params={'filename': args[1].encode()})
         elif args[0] == 'info':
             request('info', params={'filename': args[1].encode()})
+        elif args[0] == 'read':
+            request('read', params={'filename': args[1].encode()})
         else:
             print("Incorrect command!\nFor help write command: help")
     elif len(args) == 3:
