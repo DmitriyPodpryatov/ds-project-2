@@ -21,7 +21,7 @@ def hello():
 def init():
     os.system('rm -rf ' + base_path + "/*")
     total, used, free = shutil.disk_usage('/')
-    return Response(status=200, response=str(free).encode())
+    return Response(status=200, response=str(free))
 
 
 @app.route('/touch')
@@ -29,7 +29,7 @@ def touch():
     # Get params
     filename = request.args.get('filename')
 
-    os.system('touch ' + filename)
+    os.system('touch ' + base_path + '/' + filename)
     return Response(status=200, response='File created')
 
 

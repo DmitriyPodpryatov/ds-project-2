@@ -6,15 +6,15 @@ import requests
 
 class FileSystem:
     def __init__(self):
-        self.root = FileSystem.File('/', is_dir=True, child={})
+        self.root = FileSystem.File('/', is_dir=True, children={})
 
     class File:
-        def __init__(self, name: str, is_dir: bool, parent=None, child=None,
-                     location: [] = None):
-            if child is None:
-                child = {}
+        def __init__(self, name: str, is_dir: bool, parent=None, children=None, location: [] = None):
+            if children is None:
+                children = {}
+
             self.name = name
-            self.child = child
+            self.children = children
             self.parent = parent
             self.is_dir = is_dir
             self.location = location
@@ -29,11 +29,17 @@ class FileSystem:
         return []
 
     def add_node(self, path: str, is_dir: bool, location: list):
+        if path[0] != '/':
+            # No root '/' => add '/' at the beginning
+            path = '/' + path
+
         directories = path.split('/')[1:]
         current_node = self.root
+
         for dir in directories[:-1]:
             current_node = current_node.children.get(dir)
-        new_node = FileSystem.File(directories[-1], is_dir, parent=current_node, child={}, location=location)
+
+        new_node = FileSystem.File(directories[-1], is_dir, parent=current_node, children={}, location=location)
         current_node.children.update({directories[-1]: new_node})
 
     def update_location(self, path: str, location: str):
@@ -48,7 +54,7 @@ class FileSystem:
         current_node = self.root
         for dir in directories:
             current_node = current_node.children.get(dir)
-        if current_node is not None and current_node.is_dir == True:
+        if current_node is not None and current_node.is_dir:
             return True
         else:
             return False
@@ -57,7 +63,12 @@ class FileSystem:
         directories = path.split("/")[1:]
         current_node = self.root
         for dir in directories:
-            current_node = current_node.children.get(dir)
+            try:
+                current_node = current_node.children.get(dir)
+            except AttributeError:
+                # No children => wrong path
+                return None
+
         if current_node is not None and not current_node.is_dir:
             return True
         else:
@@ -90,8 +101,9 @@ def init():
             response = requests.get("http://" + datanode + "/init")
         except requests.exceptions.RequestException:
             continue
-        result += int(response.content.decode())
-    storage = "The available storage is " + str(result // 3)
+        result += int(response.content)
+
+    storage = "The available storage is " + str(round(result // len(datanodes) / (1024 * 1024), 2)) + " MB"
     return Response(status=200, response=storage)
 
 
@@ -103,14 +115,17 @@ def touch():
     # Create file if it does not exists
     global fs
     response = 'Failed'
-    if fs and not fs.file_exists(filename):
+
+    # True (exists), False (doesn't exist), or None (error)
+    exists = fs.file_exists(filename)
+    if fs and exists is not None and not exists:
         for datanode in datanodes:
             try:
                 response = requests.get("http://" + datanode + "/touch", params={'filename': filename})
             except requests.exceptions.RequestException:
                 continue
 
-        # TODO: create file in the FileSystem
+        fs.add_node(path=filename, is_dir=False, location=datanodes)
 
     return Response(status=200, response=response.content)
 

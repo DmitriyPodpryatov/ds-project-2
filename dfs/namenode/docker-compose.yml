@@ -4,8 +4,6 @@ services:
   namenode:
     #    image:
     build: .
-    deploy:
-      restart_policy:
-        condition: on-failure
+    restart: on-failure
     ports:
       - 5555:5555

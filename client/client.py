@@ -57,7 +57,7 @@ def main():
     elif len(args) == 2:
         # Create file
         if args[0] == 'touch':
-            request('touch', params={'filename': args[1]})
+            request('touch', params={'filename': args[1].encode()})
 
         else:
             print("Incorrect command!\nFor help write command: help")
