@@ -15,7 +15,6 @@ def request(s: str, params=None, show=True):
         if show:
             print(result.text)
 
-
     except Exception as e:
         print(e)
 
@@ -55,7 +54,7 @@ def main():
         # Create file
         if args[0] == 'touch':
             request('touch', params={'filename': args[1].encode()})
-        if args[0] == 'info':
+        elif args[0] == 'info':
             request('info', params={'filename': args[1].encode()})
         else:
             print("Incorrect command!\nFor help write command: help")
