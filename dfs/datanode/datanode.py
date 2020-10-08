@@ -45,14 +45,14 @@ def copy():
 def info():
     # Get params
     filename = request.args.get('filename')
-    file = base_path + '/' + filename
-    result = 'File         :' + filename + '\n'
-    result += 'Access time  :' + time.ctime(os.path.getatime(file)) + '\n'
-    result += 'Modified time:' + time.ctime(os.path.getmtime(file)) + '\n'
-    result += 'Change time  :' + time.ctime(os.path.getctime(file)) + '\n'
-    result += 'Size         :' + os.path.getsize(file)
-    response = f'The information:\n' + result
-    return Response(status=200, response=response)
+    # file = base_path + '/' + filename
+    # result = 'File         :' + filename + '\n'
+    # result += 'Access time  :' + time.ctime(os.path.getatime(file)) + '\n'
+    # result += 'Modified time:' + time.ctime(os.path.getmtime(file)) + '\n'
+    # result += 'Change time  :' + time.ctime(os.path.getctime(file)) + '\n'
+    # result += 'Size         :' + os.path.getsize(file)
+    # response = f'The information:\n' + result
+    return Response(status=200, response="Hello my friend")
 
 
 if __name__ == '__main__':
