@@ -4,6 +4,14 @@ import os
 import requests
 
 
+def valid_path(path: str):
+    if path[0] != '/':
+        # No root '/' => add '/' at the beginning
+        path = '/' + path
+
+    return path
+
+
 class FileSystem:
     def __init__(self):
         self.root = FileSystem.File('/', is_dir=True, children={})
@@ -20,6 +28,8 @@ class FileSystem:
             self.location = location
 
     def find_node(self, path: str):
+        path = valid_path(path)
+
         directories = path.split("/")[1:]
         current_node = self.root
         for dir in directories:
@@ -29,9 +39,7 @@ class FileSystem:
         return []
 
     def add_node(self, path: str, is_dir: bool, location: list):
-        if path[0] != '/':
-            # No root '/' => add '/' at the beginning
-            path = '/' + path
+        path = valid_path(path)
 
         directories = path.split('/')[1:]
         current_node = self.root
@@ -43,6 +51,8 @@ class FileSystem:
         current_node.children.update({directories[-1]: new_node})
 
     def update_location(self, path: str, location: str):
+        path = valid_path(path)
+
         directories = path.split('/')[1:]
         current_node = self.root
         for dir in directories:
@@ -50,6 +60,8 @@ class FileSystem:
         current_node.location.append(location)
 
     def dir_exists(self, path: str):
+        path = valid_path(path)
+
         directories = path.split("/")[1:]
         current_node = self.root
         for dir in directories:
@@ -60,6 +72,8 @@ class FileSystem:
             return False
 
     def file_exists(self, path: str):
+        path = valid_path(path)
+
         directories = path.split("/")[1:]
         current_node = self.root
         for dir in directories:
@@ -127,7 +141,12 @@ def touch():
 
         fs.add_node(path=filename, is_dir=False, location=datanodes)
 
-    return Response(status=200, response=response.content)
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
 
 
 if __name__ == '__main__':
