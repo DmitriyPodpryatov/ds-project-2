@@ -149,5 +149,47 @@ def touch():
         return Response(status=200, response=response.content)
 
 
+@app.route('/copy')
+def copy():
+    source = request.args.get('source')
+    destination = request.args.get('destination')
+    global fs
+    response = 'Failed'
+    exists = fs.file_exists(source)
+    # if File System is initialized and source file exists
+    if fs and exists is not None and not exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/copy",
+                                        params={'source': source, 'destination': destination})
+            except requests.exceptions.RequestException:
+                continue
+
+        fs.add_node(path=destination, is_dir=False, location=datanodes)
+
+    return Response(status=200, response=response.content)
+
+
+@app.route('/info')
+def touch():
+    # Get params
+    filename = request.args.get('filename')
+
+    # Create file if it does not exists
+    global fs
+    response = 'Failed'
+
+    # True (exists), False (doesn't exist), or None (error)
+    exists = fs.file_exists(filename)
+    if fs and exists is not None and not exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/info", params={'filename': filename})
+                break  # since we no need to get info about one file several times, one is enough
+            except requests.exceptions.RequestException:
+                continue
+    return Response(status=200, response=response.content)
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5555, debug=True, use_reloader=False)

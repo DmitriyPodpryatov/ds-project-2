@@ -12,7 +12,6 @@ def request(s: str, params=None, show=True):
     try:
         # https://requests.readthedocs.io/en/master/user/quickstart/
         result = requests.get(f'http://{namenode}/' + s, params=params)
-
         if show:
             print(result.text)
 
@@ -49,7 +48,6 @@ def main():
 
         elif args[0] == 'init':
             request('init')
-
         else:
             print("Incorrect command!\nFor help write command: help")
 
@@ -57,9 +55,13 @@ def main():
         # Create file
         if args[0] == 'touch':
             request('touch', params={'filename': args[1].encode()})
-
+        if args[0] == 'info':
+            request('info', params={'filename': args[1].encode()})
         else:
             print("Incorrect command!\nFor help write command: help")
+    elif len(args) == 3:
+        if args[0] == 'copy':
+            request('copy', params={'source': args[1].encode(), 'destination': args[2].encode()})
 
 
 if __name__ == '__main__':

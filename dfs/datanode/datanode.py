@@ -28,9 +28,28 @@ def init():
 def touch():
     # Get params
     filename = request.args.get('filename')
-
     os.system('touch ' + base_path + '/' + filename)
-    return Response(status=200, response='File created')
+    return Response(status=200, response=f'File {filename} was created.')
+
+
+@app.route('/copy')
+def touch():
+    # Get params
+    source = request.args.get('source')
+    destination = request.args.get('destination')
+    os.system('cp ' + base_path + '/' + source + ' ' + destination)
+    return Response(status=200, response=f'Copy of file {source} was created with name {destination}.')
+
+
+@app.route('/info')
+def touch():
+    # Get params
+    filename = request.args.get('filename')
+
+    # not sure that os.system returns output, but will see
+    result = os.system('stat ' + base_path + '/' + filename)
+    response = f'The information about file {filename}:\n' + result
+    return Response(status=200, response=response)
 
 
 if __name__ == '__main__':
