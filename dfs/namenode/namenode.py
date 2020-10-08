@@ -167,7 +167,12 @@ def copy():
 
         fs.add_node(path=destination, is_dir=False, location=datanodes)
 
-    return Response(status=200, response=response.content)
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
 
 
 @app.route('/info')
@@ -188,7 +193,13 @@ def info():
                 break  # since we no need to get info about one file several times, one is enough
             except requests.exceptions.RequestException:
                 continue
-    return Response(status=200, response=response.content)
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
 
 
 if __name__ == '__main__':

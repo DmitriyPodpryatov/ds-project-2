@@ -1,6 +1,6 @@
 import os
 import shutil
-
+import subprocess
 from flask import Flask, Response, request
 from flask_cors import CORS
 
@@ -44,8 +44,7 @@ def info():
     # Get params
     filename = request.args.get('filename')
 
-    # not sure that os.system returns output, but will see
-    result = os.system('stat ' + base_path + '/' + filename)
+    result = subprocess.check_output('stat ' + base_path + '/' + filename, shell=True)
     response = f'The information about file {filename}:\n' + result
     return Response(status=200, response=response)
 
