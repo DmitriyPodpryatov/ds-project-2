@@ -3,6 +3,8 @@ import shutil
 import subprocess
 from flask import Flask, Response, request
 from flask_cors import CORS
+import os.path
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -35,17 +37,21 @@ def copy():
     # Get params
     source = request.args.get('source')
     destination = request.args.get('destination')
-    os.system('cp ' + base_path + '/' + source + ' ' + destination)
-    return Response(status=200, response=f'Copy of file {source} was created with name {destination}.')
+    os.system('cp ' + base_path + '/' + source + ' ' + base_path + '/' + destination)
+    return Response(status=200, response=f'Copy of file {source} was created with name {destination}')
 
 
 @app.route('/info')
 def info():
     # Get params
     filename = request.args.get('filename')
-
-    result = subprocess.check_output('stat ' + base_path + '/' + filename, shell=True)
-    response = f'The information about file {filename}:\n' + result
+    file = base_path + '/' + filename
+    result = 'File         :' + filename + '\n'
+    result += 'Access time  :' + time.ctime(os.path.getatime(file)) + '\n'
+    result += 'Modified time:' + time.ctime(os.path.getmtime(file)) + '\n'
+    result += 'Change time  :' + time.ctime(os.path.getctime(file)) + '\n'
+    result += 'Size         :' + os.path.getsize(file)
+    response = f'The information:\n' + result
     return Response(status=200, response=response)
 
 
