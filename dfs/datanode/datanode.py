@@ -33,7 +33,7 @@ def touch():
 
 
 @app.route('/copy')
-def touch():
+def copy():
     # Get params
     source = request.args.get('source')
     destination = request.args.get('destination')
@@ -42,7 +42,7 @@ def touch():
 
 
 @app.route('/info')
-def touch():
+def info():
     # Get params
     filename = request.args.get('filename')
 

@@ -171,7 +171,7 @@ def copy():
 
 
 @app.route('/info')
-def touch():
+def info():
     # Get params
     filename = request.args.get('filename')
 
