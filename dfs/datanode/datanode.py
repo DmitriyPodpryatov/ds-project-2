@@ -32,6 +32,14 @@ def touch():
     return Response(status=200, response=f'File {filename} was created.')
 
 
+@app.route('/mkdir')
+def mkdir():
+    # Get params
+    dirname = request.args.get('dirname')
+    os.system('mkdir ' + base_path + '/' + dirname)
+    return Response(status=200, response=f'Directory {dirname} was created.')
+
+
 @app.route('/copy')
 def copy():
     # Get params

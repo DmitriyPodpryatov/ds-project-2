@@ -148,6 +148,34 @@ def touch():
         # response == Response object
         return Response(status=200, response=response.content)
 
+@app.route('/mkdir')
+def mkdir():
+    # Get params
+    dirname = request.args.get('dirname')
+
+    # Create file if it does not exists
+    global fs
+    response = 'Failed'
+
+    # True (exists), False (doesn't exist), or None (error)
+    exists = fs.dir_exists(dirname)
+
+    if fs and exists is not None and not exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/mkdir", params={'dirname': dirname})
+            except requests.exceptions.RequestException:
+                continue
+
+        fs.add_node(path=dirname, is_dir=True, location=datanodes)
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
 
 @app.route('/copy')
 def copy():
