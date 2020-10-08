@@ -2,7 +2,7 @@ import sys
 import requests
 import os
 
-namenode = "10.0.15.10"
+namenode = "10.0.15.10:5555"
 
 
 def request(s: str, params=None, show=True):
@@ -11,12 +11,11 @@ def request(s: str, params=None, show=True):
 
     try:
         # https://requests.readthedocs.io/en/master/user/quickstart/
-        result = requests.get(f'http://{namenode}:5555/' + s, params=params)
+        result = requests.get(f'http://{namenode}/' + s, params=params)
 
         if show:
             print(result.text)
 
-        return result.json()['msg']
 
     except Exception as e:
         print(e)
