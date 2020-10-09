@@ -256,7 +256,7 @@ def mkdir():
     # True (exists), False (doesn't exist), or None (error)
     exists = fs.dir_exists(dirname)
 
-    if fs and exists is not None and not exists:
+    if fs is not None and not exists:
         for datanode in datanodes:
             try:
                 response = requests.get("http://" + datanode + "/mkdir", params={'dirname': dirname})
@@ -392,6 +392,24 @@ def move():
     else:
         # response == Response object
         return Response(status=200, response=response.content)
+
+
+@app.route('/read')
+def read():
+    # Get params
+    filename = request.args.get('filename')
+
+    # Create file if it does not exists
+    global fs
+    response = 'Failed'
+
+    # True (exists), False (doesn't exist), or None (error)
+    file_exists = fs.file_exists(filename)
+    if file_exists:
+        datanode = fs.get_node(filename).location[0]
+        return Response(status=200, response=datanode)
+    else:
+        return Response(status=200, response=response)
 
 
 @app.route('/info')

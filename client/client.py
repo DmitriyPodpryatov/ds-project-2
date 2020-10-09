@@ -5,19 +5,24 @@ import os
 namenode = "10.0.15.10:5555"
 
 
-def request(s: str, params=None, show=True):
+def request(s: str, params=None, show=True, download=False):
     if params is None:
         params = {}
 
     try:
         # https://requests.readthedocs.io/en/master/user/quickstart/
         result = requests.get(f'http://{namenode}/' + s, params=params)
+        if download and result != 'Failed':
+            data = requests.get(f'http://{result.text}/' + s, params=params)
+            filename = params['filename']
+            downloaded_file = open(filename, "wb")
+            downloaded_file.write(data)
+            print(f"File {filename} is successfully downloaded.")
         if show:
             print(result.text)
 
     except Exception as e:
         print(e)
-
 
 def print_help():
     print("""\nList of available commands:
@@ -61,7 +66,7 @@ def main():
             request('info', params={'filename': args[1].encode()})
 
         elif args[0] == 'read':
-            request('read', params={'filename': args[1].encode()})
+            request('read', params={'filename': args[1].encode()}, download=True, show=False)
 
         elif args[0] == 'rm':
             request('rm', params={'filename': args[1].encode()})
@@ -84,6 +89,8 @@ def main():
 
         elif args[0] == 'move':
             request('move', params={'filename': args[1].encode(), 'destination_dir': args[2].encode()})
+        elif args[0] == 'write':
+            request('write', params={'filename': args[1].encode(), 'destination_dir': args[2].encode()})
 
         else:
             print("Incorrect command!\nFor help write command: help")

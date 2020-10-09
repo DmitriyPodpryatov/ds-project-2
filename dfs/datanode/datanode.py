@@ -1,7 +1,7 @@
 import os
 import shutil
 import subprocess
-from flask import Flask, Response, request
+from flask import Flask, Response, request, send_from_directory
 from flask_cors import CORS
 import os.path
 import time
@@ -85,6 +85,14 @@ def move():
     return Response(status=200, response=f'File {filename} was moved to directory {destination_dir}.')
 
 
+@app.route('/read', methods=['GET', 'POST'])
+def read():
+    filename = base_path + '/' + request.args.get('filename')
+    with open(filename, 'rb') as fp:
+        data = fp.read()
+    return Response(status=200, response=data)
+
+
 @app.route('/info')
 def info():
     # Get params
@@ -96,7 +104,6 @@ def info():
     except BaseException as e:
         response = e
 
-    # response = "The information:\n" + output
     return Response(status=200, response=response)
 
 
