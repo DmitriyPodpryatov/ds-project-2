@@ -148,6 +148,7 @@ def touch():
         # response == Response object
         return Response(status=200, response=response.content)
 
+
 @app.route('/mkdir')
 def mkdir():
     # Get params
@@ -218,7 +219,6 @@ def info():
         for datanode in datanodes:
             try:
                 response = requests.get("http://" + datanode + "/info", params={'filename': filename})
-                # break  # since we no need to get info about one file several times, one is enough
             except requests.exceptions.RequestException:
                 continue
 

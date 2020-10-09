@@ -46,21 +46,17 @@ def copy():
     source = request.args.get('source')
     destination = request.args.get('destination')
     os.system('cp ' + base_path + '/' + source + ' ' + base_path + '/' + destination)
-    return Response(status=200, response=f'Copy of file {source} was created with name {destination}')
+    return Response(status=200, response=f'Copy of file {source} was created at {destination}')
 
 
 @app.route('/info')
 def info():
     # Get params
     filename = request.args.get('filename')
-    # file = base_path + '/' + filename
-    # result = 'File         :' + filename + '\n'
-    # result += 'Access time  :' + time.ctime(os.path.getatime(file)) + '\n'
-    # result += 'Modified time:' + time.ctime(os.path.getmtime(file)) + '\n'
-    # result += 'Change time  :' + time.ctime(os.path.getctime(file)) + '\n'
-    # result += 'Size         :' + os.path.getsize(file)
-    # response = f'The information:\n' + result
-    return Response(status=200, response="Hello my friend")
+
+    output = subprocess.check_output('stat ' + filename, shell=True)
+    response = "The information:\n" + output
+    return Response(status=200, response=response)
 
 
 if __name__ == '__main__':

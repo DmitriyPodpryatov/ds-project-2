@@ -54,7 +54,7 @@ def main():
         # Create file
         if args[0] == 'touch':
             request('touch', params={'filename': args[1].encode()})
-        if args[0] == 'mkdir':
+        elif args[0] == 'mkdir':
             request('mkdir', params={'dirname': args[1].encode()})
         elif args[0] == 'info':
             request('info', params={'filename': args[1].encode()})
