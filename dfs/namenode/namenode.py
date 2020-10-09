@@ -377,7 +377,7 @@ def move():
         fs.delete_node(moving_file, datanodes)
         temp_path = valid_path(moving_file)
         new_filename = destination_dir + temp_path[temp_path.rfind('/'):-1]
-        fs.add_node(destination_dir + new_filename, is_dir=False, location=datanodes)
+        fs.add_node(new_filename, is_dir=False, location=datanodes)
 
     if type(response) == str:
         # response == 'Failed'
