@@ -36,7 +36,7 @@ def touch():
 def ls():
     # Get params
     dirname = request.args.get('dirname')
-    files = os.listdir(dirname)
+    files = os.listdir(base_path + '/' + dirname)
 
     response = ''
     for file in files:
