@@ -67,7 +67,7 @@ def main():
             request('rm', params={'filename': args[1].encode()})
 
         elif args[0] == 'rmdir':
-            with requests.Session as session:
+            with requests.Session() as session:
                 response = session.get(f'http://{namenode}/rmdir', params={'dirname': args[1].encode()})
 
                 if response == 'nonempty':
