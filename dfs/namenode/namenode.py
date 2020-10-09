@@ -292,7 +292,6 @@ def rmdir():
     global fs
     response = 'Failed'
 
-    # True (exists), False (doesn't exist), or None (error)
     dir_exists = fs.dir_exists(dirname)
     if fs is not None and dir_exists:
         for datanode in datanodes:

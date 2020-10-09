@@ -56,7 +56,7 @@ def rm():
     return Response(status=200, response=f'File {filename} was deleted.')
 
 @app.route('/rmdir')
-def rm():
+def rmdir():
     dirname = request.args.get('dirname')
     os.system('rm -rf ' + base_path + '/' + dirname)
     return Response(status=200, response=f'Directory {dirname} was deleted.')
@@ -66,9 +66,14 @@ def rm():
 def info():
     # Get params
     filename = request.args.get('filename')
-    output = subprocess.Popen('stat ' + filename, stdout=subprocess.PIPE).communicate()[0]
-    # output = subprocess.check_output('stat ' + filename, shell=True)
-    response = "The information:\n" + output
+
+    try:
+        output = subprocess.check_output('stat ' + filename, shell=True)
+        response = "The information:\n" + output
+    except BaseException as e:
+        response = e
+
+    # response = "The information:\n" + output
     return Response(status=200, response=response)
 
 
