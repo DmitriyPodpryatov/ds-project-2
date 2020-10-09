@@ -76,11 +76,14 @@ def main():
             with requests.Session() as session:
                 response = session.get(f'http://{namenode}/rmdir', params={'dirname': args[1].encode()})
 
-                if response == 'nonempty':
+                if response.text == 'nonempty':
                     ack = input('rmdir: do you want to remove nonempty directory? [y/N] ')
 
                     if ack == 'y':
-                        session.get('rmdir', params={'dirname': args[1].encode(), 'ack': 'y'})
+                        result = session.get(f'http://{namenode}/rmdir', params={'dirname': args[1].encode(), 'ack': 'y'})
+                        print(result.text)
+                else:
+                    print(response.text)
 
         else:
             print("Incorrect command!\nFor help write command: help")
