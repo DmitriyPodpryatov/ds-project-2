@@ -455,10 +455,14 @@ def write():
     # dir exists but file must not exist
     dir_exists = fs.dir_exists(destination_dir)
     file_exists = fs.file_exists(destination_dir + filename)
+    global datanodes
     if dir_exists and not file_exists:
-        datanodes = '|'.join(fs.get_node(destination_dir).location)
+        if destination_dir == '/':
+            nodes = datanodes
+        else:
+            nodes = '|'.join(fs.get_node(destination_dir).location)
         fs.add_node(destination_dir + filename, is_dir=False, location=fs.get_node(destination_dir).location)
-        return Response(status=200, response=datanodes)
+        return Response(status=200, response=nodes)
     else:
         return Response(status=200, response=response)
 

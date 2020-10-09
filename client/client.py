@@ -31,7 +31,7 @@ def request(s: str, params=None, show=True, download=False, upload=False):
             if type(response) == str:
                 print(response)
             else:
-                print(response.content)
+                print(response.text)
         elif show:
             print(result.text)
 
