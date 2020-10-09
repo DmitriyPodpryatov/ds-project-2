@@ -1,10 +1,9 @@
 import os
 import shutil
 import subprocess
-from flask import Flask, Response, request, send_from_directory
+from flask import Flask, Response, request
 from flask_cors import CORS
 import os.path
-import time
 
 app = Flask(__name__)
 CORS(app)
@@ -91,6 +90,21 @@ def read():
     with open(filename, 'rb') as fp:
         data = fp.read()
     return Response(status=200, response=data)
+
+
+@app.route('/write', methods=['GET', 'POST'])
+def write():
+    filename = request.args.get('filename')
+    destination_dir = request.args.get('destination_dir')
+    if filename[0] != '/':
+        filename = '/' + filename
+    filename = filename[filename.rfind('/'):-1]
+    filename = destination_dir + filename
+    filename = base_path + '/' + filename
+    data = request.args.get('data')
+    file = open(filename, "wb")
+    file.write(bytes(data))
+    return Response(status=200, response=f"The data is put into dfs in file {filename}.")
 
 
 @app.route('/info')

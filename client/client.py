@@ -1,11 +1,11 @@
 import sys
 import requests
-import os
+
 
 namenode = "10.0.15.10:5555"
 
 
-def request(s: str, params=None, show=True, download=False):
+def request(s: str, params=None, show=True, download=False, upload=False):
     if params is None:
         params = {}
 
@@ -18,6 +18,19 @@ def request(s: str, params=None, show=True, download=False):
             downloaded_file = open(filename, "wb")
             downloaded_file.write(bytes(data))
             print(f"File {filename} is successfully downloaded.")
+        elif upload and result.text != 'Failed':
+            filename = params['filename']
+            with open(filename, 'rb') as fp:
+                data = fp.read()
+            params = {'filename': params['filename'], 'destination_dir': params['destination_dir'], "data": data}
+            datanodes = result.text.split("|")
+            response = "Failed"
+            for datanode in datanodes:
+                response = requests.get(f'http://{datanode}/' + s, params=params)
+            if type(response) == str:
+                print(response)
+            else:
+                print(response.content)
         elif show:
             print(result.text)
 
@@ -94,7 +107,7 @@ def main():
         elif args[0] == 'move':
             request('move', params={'filename': args[1].encode(), 'destination_dir': args[2].encode()})
         elif args[0] == 'write':
-            request('write', params={'filename': args[1].encode(), 'destination_dir': args[2].encode()})
+            request('write', params={'filename': args[1].encode(), 'destination_dir': args[2].encode()}, upload=True, show=False)
 
         else:
             print("Incorrect command!\nFor help write command: help")

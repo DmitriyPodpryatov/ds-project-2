@@ -1,6 +1,5 @@
 from flask import Flask, Response, request
 from flask_cors import CORS
-import os
 import requests
 
 
@@ -408,6 +407,28 @@ def read():
     if file_exists:
         datanode = fs.get_node(filename).location[0]
         return Response(status=200, response=datanode)
+    else:
+        return Response(status=200, response=response)
+
+
+@app.route('/write')
+def write():
+    # Get params
+    destination_dir = request.args.get('destination_dir')
+    filename = valid_path(request.args.get('filename'))
+    filename = filename[filename.rfind('/'):-1]
+
+    # Create file if it does not exists
+    global fs
+    response = 'Failed'
+
+    # dir exists but file must not exist
+    dir_exists = fs.dir_exists(destination_dir)
+    file_exists = fs.file_exists(destination_dir + filename)
+    if dir_exists and not file_exists:
+        datanodes = '|'.join(fs.get_node(destination_dir).location)
+        fs.add_node(destination_dir + filename, is_dir=False, location=fs.get_node(destination_dir).location)
+        return Response(status=200, response=datanodes)
     else:
         return Response(status=200, response=response)
 
