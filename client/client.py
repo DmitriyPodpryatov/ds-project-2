@@ -65,6 +65,8 @@ def main():
     elif len(args) == 3:
         if args[0] == 'copy':
             request('copy', params={'source': args[1].encode(), 'destination': args[2].encode()})
+        elif args[0] == 'move':
+            request('move', params={'file': args[1].encode(), 'destination': args[2].encode()})
 
 
 if __name__ == '__main__':

@@ -148,6 +148,7 @@ def touch():
         # response == Response object
         return Response(status=200, response=response.content)
 
+
 @app.route('/mkdir')
 def mkdir():
     # Get params
@@ -183,9 +184,14 @@ def copy():
     destination = request.args.get('destination')
     global fs
     response = 'Failed'
-    exists = fs.file_exists(source)
+    file_exists = fs.file_exists(source)
+    dest_dir_exists = True
+    if destination.rfind('/') != -1 and destination.rfind('/') != 0:
+        destination_dir = destination[0:destination.rfind('/')]
+        dest_dir_exists = fs.dir_exists(destination_dir)
+
     # if File System is initialized and source file exists
-    if fs is not None and exists:
+    if fs is not None and file_exists and dest_dir_exists:
         for datanode in datanodes:
             try:
                 response = requests.get("http://" + datanode + "/copy",
