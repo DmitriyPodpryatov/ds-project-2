@@ -83,8 +83,14 @@ class FileSystem:
 
         directories = path.split("/")[1:]
         current_node = self.root
+
+        # path == '/' => root is a directory
+        if directories[0] == '':
+            return True
+
         for dir in directories:
             current_node = current_node.children.get(dir)
+
         if current_node is not None and current_node.is_dir:
             return True
         else:
