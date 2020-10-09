@@ -54,16 +54,32 @@ def main():
         # Create file
         if args[0] == 'touch':
             request('touch', params={'filename': args[1].encode()})
+
+        elif args[0] == 'ls':
+            request('ls', params={'dirname': args[1].encode()})
+
         elif args[0] == 'mkdir':
             request('mkdir', params={'dirname': args[1].encode()})
+
         elif args[0] == 'info':
             request('info', params={'filename': args[1].encode()})
+
         elif args[0] == 'read':
             request('read', params={'filename': args[1].encode()})
+
         elif args[0] == 'rm':
             request('rm', params={'filename': args[1].encode()})
+
         elif args[0] == 'rmdir':
-            request('rmdir', params={'dirname': args[1].encode()})
+            with requests.Session as session:
+                response = session.get('rmdir', params={'dirname': args[1].encode()})
+
+                if response == 'nonempty':
+                    ack = input('rmdir: do you want to remove nonempty directory? [y/N] ')
+
+                    if ack == 'y':
+                        session.get('rmdir', params={'dirname': args[1].encode(), 'ack': 'y'})
+
         else:
             print("Incorrect command!\nFor help write command: help")
     elif len(args) == 3:

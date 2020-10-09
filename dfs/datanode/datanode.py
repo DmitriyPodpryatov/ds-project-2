@@ -32,6 +32,19 @@ def touch():
     return Response(status=200, response=f'File {filename} was created.')
 
 
+@app.route('/ls')
+def ls():
+    # Get params
+    dirname = request.args.get('dirname')
+    files = os.listdir(dirname)
+
+    response = ''
+    for file in files:
+        response += file + '\t'
+
+    return Response(status=200, response=response)
+
+
 @app.route('/mkdir')
 def mkdir():
     # Get params
@@ -54,6 +67,7 @@ def rm():
     filename = request.args.get('filename')
     os.system('rm ' + base_path + '/' + filename)
     return Response(status=200, response=f'File {filename} was deleted.')
+
 
 @app.route('/rmdir')
 def rmdir():

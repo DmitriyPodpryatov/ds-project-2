@@ -27,6 +27,16 @@ class FileSystem:
             self.is_dir = is_dir
             self.location = location
 
+    def get_node(self, path: str):
+        path = valid_path(path)
+
+        directories = path.split("/")[1:]
+        current_node = self.root
+        for dir in directories:
+            current_node = current_node.children.get(dir)
+
+        return current_node
+
     def find_node(self, path: str):
         path = valid_path(path)
 
@@ -37,6 +47,15 @@ class FileSystem:
         if current_node is not None:
             return current_node.location
         return []
+
+    def has_children(self, path):
+        if self.dir_exists(path):
+            node = self.get_node(path)
+
+            if len(node.children):
+                return True
+            else:
+                return False
 
     def add_node(self, path: str, is_dir: bool, location: list):
         path = valid_path(path)
@@ -195,6 +214,30 @@ def touch():
         return Response(status=200, response=response.content)
 
 
+@app.route('/ls')
+def ls():
+    # Get params
+    dirname = request.args.get('dirname')
+
+    global fs
+    response = 'Failed'
+
+    dir_exists = fs.dir_exists(dirname)
+    if fs is not None and dir_exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/ls", params={'dirname': dirname})
+            except requests.exceptions.RequestException:
+                continue
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
+
 @app.route('/mkdir')
 def mkdir():
     # Get params
@@ -287,6 +330,7 @@ def rm():
 def rmdir():
     # Get params
     dirname = request.args.get('dirname')
+    ack = request.args.get('ack')
 
     # Create file if it does not exists
     global fs
@@ -294,6 +338,9 @@ def rmdir():
 
     dir_exists = fs.dir_exists(dirname)
     if fs is not None and dir_exists:
+        if fs.has_children(dirname):
+            return Response(status=200, response='nonempty')
+
         for datanode in datanodes:
             try:
                 response = requests.get("http://" + datanode + "/rmdir", params={'dirname': dirname})
