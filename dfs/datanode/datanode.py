@@ -122,7 +122,7 @@ def info():
     filename = request.args.get('filename')
 
     try:
-        output = subprocess.check_output('stat ' + filename, shell=True)
+        output = subprocess.check_output(['stat ' + filename], shell=True)
         response = "The information:\n" + output
     except BaseException as e:
         response = e

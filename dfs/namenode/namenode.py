@@ -464,7 +464,7 @@ def write():
     global datanodes
     if dir_exists and not file_exists:
         if destination_dir == '/':
-            nodes = datanodes
+            nodes = '|'.join(datanodes)
             fs.add_node(filename, is_dir=False, location=nodes)
         else:
             nodes = '|'.join(fs.get_node(destination_dir).location)
