@@ -338,22 +338,23 @@ def rmdir():
     dirname = request.args.get('dirname')
     ack = request.args.get('ack')
 
-    # Create file if it does not exists
     global fs
     response = 'Failed'
 
     dir_exists = fs.dir_exists(dirname)
     if fs is not None and dir_exists:
-        if fs.has_children(dirname):
+
+        if fs.has_children(dirname) and ack is None:
             return Response(status=200, response='nonempty')
 
-        for datanode in datanodes:
-            try:
-                response = requests.get("http://" + datanode + "/rmdir", params={'dirname': dirname})
-            except requests.exceptions.RequestException:
-                continue
+        if not fs.has_children(dirname) or ack == 'y':
+            for datanode in datanodes:
+                try:
+                    response = requests.get("http://" + datanode + "/rmdir", params={'dirname': dirname})
+                except requests.exceptions.RequestException:
+                    continue
 
-        fs.delete_node(path=dirname, all_datanodes=datanodes)
+            fs.delete_node(path=dirname, all_datanodes=datanodes)
 
     if type(response) == str:
         # response == 'Failed'

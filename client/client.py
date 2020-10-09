@@ -27,7 +27,6 @@ def print_help():
     """)
 
 
-
 def main():
     # Get args
     args = sys.argv[1:]
@@ -69,7 +68,7 @@ def main():
 
         elif args[0] == 'rmdir':
             with requests.Session as session:
-                response = session.get('rmdir', params={'dirname': args[1].encode()})
+                response = session.get(f'http://{namenode}/rmdir', params={'dirname': args[1].encode()})
 
                 if response == 'nonempty':
                     ack = input('rmdir: do you want to remove nonempty directory? [y/N] ')
@@ -82,8 +81,10 @@ def main():
     elif len(args) == 3:
         if args[0] == 'copy':
             request('copy', params={'source': args[1].encode(), 'destination': args[2].encode()})
+
         elif args[0] == 'move':
             request('move', params={'filename': args[1].encode(), 'destination_dir': args[2].encode()})
+
         else:
             print("Incorrect command!\nFor help write command: help")
 
