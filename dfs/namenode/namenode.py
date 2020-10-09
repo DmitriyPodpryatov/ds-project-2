@@ -14,6 +14,7 @@ def valid_path(path: str):
 class FileSystem:
     def __init__(self):
         self.root = FileSystem.File('/', is_dir=True, children={})
+        self.current_dir = self.root
 
     class File:
         def __init__(self, name: str, is_dir: bool, parent=None, children=None, location: [] = None):
@@ -26,11 +27,14 @@ class FileSystem:
             self.is_dir = is_dir
             self.location = location
 
+    def set_current_dir(self, path):
+        self.current_dir = self.get_node(path)
+
     def get_node(self, path: str):
         path = valid_path(path)
 
         directories = path.split("/")[1:]
-        current_node = self.root
+        current_node = self.current_dir
         for dir in directories:
             current_node = current_node.children.get(dir)
 
@@ -60,7 +64,7 @@ class FileSystem:
         path = valid_path(path)
 
         directories = path.split('/')[1:]
-        current_node = self.root
+        current_node = self.current_dir
 
         for dir in directories[:-1]:
             current_node = current_node.children.get(dir)
@@ -81,7 +85,7 @@ class FileSystem:
         path = valid_path(path)
 
         directories = path.split("/")[1:]
-        current_node = self.root
+        current_node = self.current_dir
 
         # path == '/' => root is a directory
         if directories[0] == '':
@@ -99,7 +103,7 @@ class FileSystem:
         path = valid_path(path)
 
         directories = path.split("/")[1:]
-        current_node = self.root
+        current_node = self.current_dir
         for dir in directories:
             try:
                 current_node = current_node.children.get(dir)
@@ -115,7 +119,7 @@ class FileSystem:
     def delete_node(self, path: str, all_datanodes):
         path = valid_path(path)
         directories = path.split("/")[1:]
-        current_node = self.root
+        current_node = self.current_dir
         response = "Failed"
         for dir in directories:
             current_node = current_node.children.get(dir)
@@ -263,6 +267,32 @@ def mkdir():
                 continue
 
         fs.add_node(path=dirname, is_dir=True, location=datanodes)
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
+
+@app.route('/cd')
+def cd():
+    # Get params
+    dirname = request.args.get('dirname')
+
+    global fs
+    response = 'Failed'
+
+    dir_exists = fs.dir_exists(dirname)
+    if fs is not None and dir_exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/cd", params={'dirname': dirname})
+            except requests.exceptions.RequestException:
+                continue
+
+        fs.set_current_dir(dirname)
 
     if type(response) == str:
         # response == 'Failed'

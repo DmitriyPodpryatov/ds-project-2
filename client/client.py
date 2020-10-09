@@ -1,7 +1,6 @@
 import sys
 import requests
 
-
 namenode = "10.0.15.10:5555"
 
 
@@ -12,12 +11,14 @@ def request(s: str, params=None, show=True, download=False, upload=False):
     try:
         # https://requests.readthedocs.io/en/master/user/quickstart/
         result = requests.get(f'http://{namenode}/' + s, params=params)
+
         if download and result.text != 'Failed':
             data = requests.get(f'http://{result.text}/' + s, params=params).content
             filename = params['filename']
             downloaded_file = open(filename, "wb")
             downloaded_file.write(bytes(data))
             print(f"File {filename} is successfully downloaded.")
+
         elif upload and result.text != 'Failed':
             filename = params['filename']
             with open(filename, 'rb') as fp:
@@ -76,6 +77,9 @@ def main():
         elif args[0] == 'mkdir':
             request('mkdir', params={'dirname': args[1].encode()})
 
+        elif args[0] == 'cd':
+            request('cd', params={'dirname': args[1].encode()})
+
         elif args[0] == 'info':
             request('info', params={'filename': args[1].encode()})
 
@@ -93,21 +97,25 @@ def main():
                     ack = input('rmdir: do you want to remove nonempty directory? [y/N] ')
 
                     if ack == 'y':
-                        result = session.get(f'http://{namenode}/rmdir', params={'dirname': args[1].encode(), 'ack': 'y'})
+                        result = session.get(f'http://{namenode}/rmdir',
+                                             params={'dirname': args[1].encode(), 'ack': 'y'})
                         print(result.text)
                 else:
                     print(response.text)
 
         else:
             print("Incorrect command!\nFor help write command: help")
+
     elif len(args) == 3:
         if args[0] == 'copy':
             request('copy', params={'source': args[1].encode(), 'destination': args[2].encode()})
 
         elif args[0] == 'move':
             request('move', params={'filename': args[1].encode(), 'destination_dir': args[2].encode()})
+
         elif args[0] == 'write':
-            request('write', params={'filename': args[1].encode(), 'destination_dir': args[2].encode()}, upload=True, show=False)
+            request('write', params={'filename': args[1].encode(), 'destination_dir': args[2].encode()}, upload=True,
+                    show=False)
 
         else:
             print("Incorrect command!\nFor help write command: help")

@@ -52,6 +52,15 @@ def mkdir():
     return Response(status=200, response=f'Directory {dirname} was created.')
 
 
+@app.route('/cd')
+def cd():
+    # Get params
+    dirname = request.args.get('dirname')
+    global base_path
+    base_path = '/dfs' + '/' + dirname
+    return Response(status=200, response=f'Changed directory to {dirname}')
+
+
 @app.route('/copy')
 def copy():
     # Get params
