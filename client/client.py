@@ -12,17 +12,18 @@ def request(s: str, params=None, show=True, download=False):
     try:
         # https://requests.readthedocs.io/en/master/user/quickstart/
         result = requests.get(f'http://{namenode}/' + s, params=params)
-        if download and result != 'Failed':
-            data = requests.get(f'http://{result.text}/' + s, params=params)
+        if download and result.text != 'Failed':
+            data = requests.get(f'http://{result.text}/' + s, params=params).content
             filename = params['filename']
             downloaded_file = open(filename, "wb")
-            downloaded_file.write(data)
+            downloaded_file.write(bytes(data))
             print(f"File {filename} is successfully downloaded.")
-        if show:
+        elif show:
             print(result.text)
 
     except Exception as e:
         print(e)
+
 
 def print_help():
     print("""\nList of available commands:
@@ -66,7 +67,7 @@ def main():
             request('info', params={'filename': args[1].encode()})
 
         elif args[0] == 'read':
-            request('read', params={'filename': args[1].encode()}, download=True, show=False)
+            request('read', params={'filename': args[1].encode()}, download=True)
 
         elif args[0] == 'rm':
             request('rm', params={'filename': args[1].encode()})
