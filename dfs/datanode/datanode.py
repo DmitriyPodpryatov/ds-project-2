@@ -53,8 +53,8 @@ def copy():
 def info():
     # Get params
     filename = request.args.get('filename')
-
-    output = subprocess.check_output('stat ' + filename, shell=True)
+    output = subprocess.Popen('stat ' + filename, stdout=subprocess.PIPE).communicate()[0]
+    # output = subprocess.check_output('stat ' + filename, shell=True)
     response = "The information:\n" + output
     return Response(status=200, response=response)
 

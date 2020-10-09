@@ -211,8 +211,8 @@ def info():
 
     # Create file if it does not exists
     global fs
-    response = 'Failed'
-
+    # response = 'Failed'
+    response = 'very beginning'
     exists = fs.file_exists(filename)
 
     if fs is not None and exists:
@@ -220,6 +220,7 @@ def info():
             try:
                 response = requests.get("http://" + datanode + "/info", params={'filename': filename})
             except requests.exceptions.RequestException:
+                response = 'exception'
                 continue
 
     if type(response) == str:
