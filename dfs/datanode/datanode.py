@@ -49,6 +49,19 @@ def copy():
     return Response(status=200, response=f'Copy of file {source} was created at {destination}')
 
 
+@app.route('/rm')
+def rm():
+    filename = request.args.get('filename')
+    os.system('rm ' + base_path + '/' + filename)
+    return Response(status=200, response=f'File {filename} was deleted.')
+
+@app.route('/rmdir')
+def rm():
+    dirname = request.args.get('dirname')
+    os.system('rm -rf ' + base_path + '/' + dirname)
+    return Response(status=200, response=f'Directory {dirname} was deleted.')
+
+
 @app.route('/info')
 def info():
     # Get params

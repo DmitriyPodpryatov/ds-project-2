@@ -88,6 +88,52 @@ class FileSystem:
         else:
             return False
 
+    def delete_node(self, path: str, all_datanodes):
+        path = valid_path(path)
+        directories = path.split("/")[1:]
+        current_node = self.root
+        response = "Failed"
+        for dir in directories:
+            current_node = current_node.children.get(dir)
+        if current_node is not None:
+            if not current_node.is_dir:
+                datanodes = current_node.location
+                for datanode in datanodes:
+                    if current_node.is_dir:
+                        try:
+                            response = requests.get("http://" + datanode + "/rmdir", params={'dirname': path})
+                        except requests.exceptions.RequestException:
+                            pass
+
+                    else:
+                        try:
+                            response = requests.get("http://" + datanode + "/rm", params={'filename': path})
+                        except requests.exceptions.RequestException:
+                            pass
+            else:
+                for datanode in all_datanodes:
+                    if current_node.is_dir:
+                        try:
+                            response = requests.get("http://" + datanode + "/rmdir", params={'dirname': path})
+                        except requests.exceptions.RequestException:
+                            pass
+
+                    else:
+                        try:
+                            response = requests.get("http://" + datanode + "/rm", params={'filename': path})
+                        except requests.exceptions.RequestException:
+                            pass
+            current_node.parent.children.pop(current_node.name)
+
+            if type(response) == str:
+                # response == 'Failed'
+                return Response(status=200, response=response)
+            else:
+                # response == Response object
+                return Response(status=200, response=response.content)
+        else:
+            return Response(status=200, response=response)
+
 
 app = Flask(__name__)
 CORS(app)
@@ -190,7 +236,7 @@ def copy():
         destination_dir = destination[0:destination.rfind('/')]
         dest_dir_exists = fs.dir_exists(destination_dir)
 
-    # if File System is initialized and source file exists
+    # if File System is initialized and source file exists and destination directory exists
     if fs is not None and file_exists and dest_dir_exists:
         for datanode in datanodes:
             try:
@@ -208,6 +254,89 @@ def copy():
         # response == Response object
         return Response(status=200, response=response.content)
 
+
+@app.route('/rm')
+def rm():
+    # Get params
+    filename = request.args.get('filename')
+
+    # Create file if it does not exists
+    global fs
+    response = 'Failed'
+
+    # True (exists), False (doesn't exist), or None (error)
+    file_exists = fs.file_exists(filename)
+    if fs is not None and file_exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/rm", params={'filename': filename})
+            except requests.exceptions.RequestException:
+                continue
+
+        fs.delete_node(path=filename, all_datanodes=datanodes)
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
+
+@app.route('/rmdir')
+def rmdir():
+    # Get params
+    dirname = request.args.get('dirname')
+
+    # Create file if it does not exists
+    global fs
+    response = 'Failed'
+
+    # True (exists), False (doesn't exist), or None (error)
+    dir_exists = fs.dir_exists(dirname)
+    if fs is not None and dir_exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/rmdir", params={'dirname': dirname})
+            except requests.exceptions.RequestException:
+                continue
+
+        fs.delete_node(path=dirname, all_datanodes=datanodes)
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
+
+# @app.route('/move')
+# def move():
+#     moving_file = request.args.get('filename')
+#     destination_dir = request.args.get('destination_dir')
+#     global fs
+#     response = 'Failed'
+#     file_exists = fs.file_exists(moving_file)
+#     dest_dir_exists = fs.dir_exists(destination_dir)
+#
+#     # if File System is initialized and source file exists and destination directory exists
+#     if fs is not None and file_exists and dest_dir_exists:
+#         for datanode in datanodes:
+#             try:
+#                 response = requests.get("http://" + datanode + "/move",
+#                                         params={'filename': moving_file, 'destination_dir': destination_dir})
+#             except requests.exceptions.RequestException:
+#                 continue
+#
+#
+#     if type(response) == str:
+#         # response == 'Failed'
+#         return Response(status=200, response=response)
+#     else:
+#         # response == Response object
+#         return Response(status=200, response=response.content)
+#
 
 @app.route('/info')
 def info():

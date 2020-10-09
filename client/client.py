@@ -60,13 +60,19 @@ def main():
             request('info', params={'filename': args[1].encode()})
         elif args[0] == 'read':
             request('read', params={'filename': args[1].encode()})
+        elif args[0] == 'rm':
+            request('rm', params={'filename': args[1].encode()})
+        elif args[0] == 'rmdir':
+            request('rmdir', params={'dirname': args[1].encode()})
         else:
             print("Incorrect command!\nFor help write command: help")
     elif len(args) == 3:
         if args[0] == 'copy':
             request('copy', params={'source': args[1].encode(), 'destination': args[2].encode()})
         elif args[0] == 'move':
-            request('move', params={'file': args[1].encode(), 'destination': args[2].encode()})
+            request('move', params={'file': args[1].encode(), 'destination_dir': args[2].encode()})
+        else:
+            print("Incorrect command!\nFor help write command: help")
 
 
 if __name__ == '__main__':
