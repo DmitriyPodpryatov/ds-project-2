@@ -76,6 +76,15 @@ def rmdir():
     return Response(status=200, response=f'Directory {dirname} was deleted.')
 
 
+@app.route('/move')
+def move():
+    filename = request.args.get('filename')
+    destination_dir = request.args.get('destination_dir')
+    os.system('mv ' + base_path + '/' + filename + " " + base_path + '/' + destination_dir)
+
+    return Response(status=200, response=f'File {filename} was moved to directory {destination_dir}.')
+
+
 @app.route('/info')
 def info():
     # Get params

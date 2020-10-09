@@ -27,9 +27,6 @@ def print_help():
     """)
 
 
-def read_file():
-    pass
-
 
 def main():
     # Get args
@@ -86,7 +83,7 @@ def main():
         if args[0] == 'copy':
             request('copy', params={'source': args[1].encode(), 'destination': args[2].encode()})
         elif args[0] == 'move':
-            request('move', params={'file': args[1].encode(), 'destination_dir': args[2].encode()})
+            request('move', params={'filename': args[1].encode(), 'destination_dir': args[2].encode()})
         else:
             print("Incorrect command!\nFor help write command: help")
 

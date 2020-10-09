@@ -357,32 +357,35 @@ def rmdir():
         return Response(status=200, response=response.content)
 
 
-# @app.route('/move')
-# def move():
-#     moving_file = request.args.get('filename')
-#     destination_dir = request.args.get('destination_dir')
-#     global fs
-#     response = 'Failed'
-#     file_exists = fs.file_exists(moving_file)
-#     dest_dir_exists = fs.dir_exists(destination_dir)
-#
-#     # if File System is initialized and source file exists and destination directory exists
-#     if fs is not None and file_exists and dest_dir_exists:
-#         for datanode in datanodes:
-#             try:
-#                 response = requests.get("http://" + datanode + "/move",
-#                                         params={'filename': moving_file, 'destination_dir': destination_dir})
-#             except requests.exceptions.RequestException:
-#                 continue
-#
-#
-#     if type(response) == str:
-#         # response == 'Failed'
-#         return Response(status=200, response=response)
-#     else:
-#         # response == Response object
-#         return Response(status=200, response=response.content)
-#
+@app.route('/move')
+def move():
+    moving_file = request.args.get('filename')
+    destination_dir = request.args.get('destination_dir')
+    global fs
+    response = 'Failed'
+    file_exists = fs.file_exists(moving_file)
+    dest_dir_exists = fs.dir_exists(destination_dir)
+
+    # if File System is initialized and source file exists and destination directory exists
+    if fs is not None and file_exists and dest_dir_exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/move",
+                                        params={'filename': moving_file, 'destination_dir': destination_dir})
+            except requests.exceptions.RequestException:
+                continue
+        fs.delete_node(moving_file, datanodes)
+        temp_path = valid_path(moving_file)
+        new_filename = destination_dir + temp_path[temp_path.rfind('/'):-1]
+        fs.add_node(destination_dir + new_filename, is_dir=False, location=datanodes)
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
 
 @app.route('/info')
 def info():
