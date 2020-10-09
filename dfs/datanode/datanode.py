@@ -113,15 +113,15 @@ def write():
     data = request.args.get('data')
     file = open(filename, "wb")
     file.write(data.encode())
-    return Response(status=200, response=f"The data is put into dfs in file {filename}.")
+    return Response(status=200, response=f"The data is put into dfs.")
 
 
 @app.route('/info')
 def info():
     # Get params
     filename = request.args.get('filename')
-
-    proc = subprocess.Popen(['stat', filename], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    filename = base_path + '/' + filename
+    proc = subprocess.Popen(['stat ' + filename], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = proc.communicate()
 
     if not err:
