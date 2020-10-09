@@ -121,11 +121,13 @@ def info():
     # Get params
     filename = request.args.get('filename')
 
-    try:
-        output = subprocess.check_output(['stat', filename], shell=True)
-        response = "The information:\n" + output
-    except BaseException as e:
-        response = e
+    proc = subprocess.Popen(['stat', filename], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+
+    if not err:
+        response = "The information:\n" + out.decode()
+    else:
+        response = err
 
     return Response(status=200, response=response)
 
