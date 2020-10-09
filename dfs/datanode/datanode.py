@@ -98,12 +98,12 @@ def write():
     destination_dir = request.args.get('destination_dir')
     if filename[0] != '/':
         filename = '/' + filename
-    filename = filename[filename.rfind('/'):-1]
+    filename = filename[filename.rfind('/'):]
     filename = destination_dir + filename
     filename = base_path + '/' + filename
     data = request.args.get('data')
     file = open(filename, "wb")
-    file.write(bytes(data))
+    file.write(data)
     return Response(status=200, response=f"The data is put into dfs in file {filename}.")
 
 

@@ -382,7 +382,7 @@ def move():
                 continue
         fs.delete_node(moving_file, datanodes)
         temp_path = valid_path(moving_file)
-        new_filename = destination_dir + temp_path[temp_path.rfind('/'):-1]
+        new_filename = destination_dir + temp_path[temp_path.rfind('/'):]
         fs.add_node(new_filename, is_dir=False, location=datanodes)
 
     if type(response) == str:
@@ -416,7 +416,7 @@ def write():
     # Get params
     destination_dir = request.args.get('destination_dir')
     filename = valid_path(request.args.get('filename'))
-    filename = filename[filename.rfind('/'):-1]
+    filename = filename[filename.rfind('/'):]
 
     # Create file if it does not exists
     global fs
