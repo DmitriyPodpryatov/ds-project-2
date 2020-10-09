@@ -23,7 +23,7 @@ def request(s: str, params=None, show=True, download=False, upload=False):
             filename = params['filename']
             with open(filename, 'rb') as fp:
                 data = fp.read()
-            params = {'filename': params['filename'], 'destination_dir': params['destination_dir'], "data": bytes(data)}
+            params = {'filename': params['filename'], 'destination_dir': params['destination_dir'], "data": data}
             datanodes = result.text.split("|")
             response = "Failed"
             for datanode in datanodes:

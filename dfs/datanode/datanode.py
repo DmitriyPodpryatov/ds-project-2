@@ -112,7 +112,7 @@ def write():
     filename = base_path + '/' + filename
     data = request.args.get('data')
     file = open(filename, "wb")
-    file.write(data)
+    file.write(data.encode())
     return Response(status=200, response=f"The data is put into dfs in file {filename}.")
 
 
