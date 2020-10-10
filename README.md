@@ -1,10 +1,18 @@
 # Distributed Systems &ndash; Project 2
 
-Students: **Lev Svalov**, **Dmitry Podpryatov**
+Students:  
+**Lev Svalov** - l.svalov@innopolis.university,  
+**Dmitry Podpryatov** - d.podpryatov@innopolis.university
 
 Group: **DS-02**
 
 ## Distributed File System
+
+### Architecture 
+
+The file system has the following structure:  
+
+![structure](https://github.com/DmitriyPodpryatov/ds-project-2/blob/main/scheme.png)
 
 ### How to Launch
 
