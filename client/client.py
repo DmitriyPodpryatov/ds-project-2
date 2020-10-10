@@ -30,7 +30,9 @@ def request(s: str, params=None, show=True, download=False, upload=False):
 
             # Get file name
             filename = params['filename'].decode()
-
+            if filename[0] != '/':
+                filename = '/' + filename
+            filename = filename[filename.rfind('/') + 1:]
             # Create file and write into it from DFS
             downloaded_file = open(filename, "wb")
             downloaded_file.write(bytes(data.encode()))
