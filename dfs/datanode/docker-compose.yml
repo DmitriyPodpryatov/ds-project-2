@@ -2,8 +2,8 @@ version: '3'
 
 services:
   datanode:
-    image: dpodpryatov/ds-project-02:datanode
-#    build: .
+#    image: dpodpryatov/ds-project-02:datanode
+    build: .
     restart: on-failure
     volumes:
       - driver:/dfs
