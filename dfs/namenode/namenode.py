@@ -203,52 +203,40 @@ class FileSystem:
         else:
             return False
 
-    def delete_node(self, path: str, all_datanodes):
+    def delete_node(self, path: str):
         """
         Delete node from file system
 
         :param path: absolute path to node
-        :param all_datanodes: list of datanodes where node is present
-
-        TODO: add comments here
         """
         path = valid_path(path)
 
         directories = path.split("/")[1:]
         current_node = self.current_dir
 
+        # walk down in order to get node to delete
         for dir in directories:
             current_node = current_node.children.get(dir)
 
         response = "Failed"
         if current_node is not None:
-            if not current_node.is_dir:
-                datanodes = current_node.location
-                for datanode in datanodes:
-                    if current_node.is_dir:
-                        try:
-                            response = requests.get("http://" + datanode + "/rmdir", params={'dirname': path})
-                        except requests.exceptions.RequestException:
-                            pass
+            # determine the type of the node we deleting
+            # get list of datanodes where the node has been located
+            datanodes = current_node.location
+            # delete it from each
+            for datanode in datanodes:
+                if current_node.is_dir:
+                    try:
+                        response = requests.get("http://" + datanode + "/rmdir", params={'dirname': path})
+                    except requests.exceptions.RequestException:
+                        pass
 
-                    else:
-                        try:
-                            response = requests.get("http://" + datanode + "/rm", params={'filename': path})
-                        except requests.exceptions.RequestException:
-                            pass
-            else:
-                for datanode in all_datanodes:
-                    if current_node.is_dir:
-                        try:
-                            response = requests.get("http://" + datanode + "/rmdir", params={'dirname': path})
-                        except requests.exceptions.RequestException:
-                            pass
+                else:
+                    try:
+                        response = requests.get("http://" + datanode + "/rm", params={'filename': path})
+                    except requests.exceptions.RequestException:
+                        pass
 
-                    else:
-                        try:
-                            response = requests.get("http://" + datanode + "/rm", params={'filename': path})
-                        except requests.exceptions.RequestException:
-                            pass
             current_node.parent.children.pop(current_node.name)
 
             if type(response) == str:
@@ -402,7 +390,8 @@ def write():
 
     global datanodes
     if dir_exists and not file_exists:
-        # TODO: add comments
+        # check case when we write to root directory, if we write to root, we write to all active datanodes
+        # since, technically, root has no FileSystem object and therefore will not have location attribute
         if destination_dir == '/':
             nodes = '|'.join(datanodes)
             fs.add_node(filename, is_dir=False, location=nodes)
@@ -438,7 +427,7 @@ def rm():
                 continue
 
         # Remove file from file system
-        fs.delete_node(path=filename, all_datanodes=datanodes)
+        fs.delete_node(path=filename)
 
     if type(response) == str:
         # response == 'Failed'
@@ -549,7 +538,7 @@ def move():
                 continue
 
         # Remove file from file system
-        fs.delete_node(moving_file, datanodes)
+        fs.delete_node(moving_file)
 
         # Get new path
         temp_path = valid_path(moving_file)
@@ -696,7 +685,7 @@ def rmdir():
                     continue
 
             # Remove folder from file system
-            fs.delete_node(path=dirname, all_datanodes=datanodes)
+            fs.delete_node(path=dirname)
 
     if type(response) == str:
         # response == 'Failed'
