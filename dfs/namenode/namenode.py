@@ -112,8 +112,10 @@ class FileSystem:
         directories = path.split('/')[1:]
         current_node = self.current_dir
 
-        for dir in directories[:-1]:
-            current_node = current_node.children.get(dir)
+        # path == '/' => root
+        if not directories[0] == '':
+            for dir in directories[:-1]:
+                current_node = current_node.children.get(dir)
 
         # Add node
         new_node = FileSystem.File(directories[-1], is_dir, parent=current_node, children={}, location=location)
@@ -516,12 +518,11 @@ def move():
         # Remove file from file system
         fs.delete_node(moving_file, all_datanodes=datanodes)
 
+        temp_path = valid_path(moving_file)
         if destination_dir != '/':
             # Get new path
-            temp_path = valid_path(moving_file)
             new_filename = destination_dir + temp_path[temp_path.rfind('/'):]
         else:
-            temp_path = valid_path(moving_file)
             new_filename = temp_path[temp_path.rfind('/')+1:]
         # Add file to file system
         fs.add_node(new_filename, is_dir=False, location=datanodes)
