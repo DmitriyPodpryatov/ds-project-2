@@ -29,11 +29,11 @@ def request(s: str, params=None, show=True, download=False, upload=False):
             data = requests.get(f'http://{result.text}/' + s, params=params).text
 
             # Get file name
-            filename = params['filename']
+            filename = params['filename'].decode()
 
             # Create file and write into it from DFS
             downloaded_file = open(filename, "wb")
-            downloaded_file.write(bytes(data))
+            downloaded_file.write(bytes(data.encode()))
 
             print(f"File {filename} is successfully downloaded.")
 
