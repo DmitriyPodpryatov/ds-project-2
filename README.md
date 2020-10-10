@@ -6,6 +6,10 @@ Students:
 
 Group: **DS-02**
 
+**Links:**   
+- [GitHub repository](https://github.com/DmitriyPodpryatov/ds-project-2)
+- [DockerHub repository](https://hub.docker.com/repository/docker/dpodpryatov/ds-project-02)
+
 ## Distributed File System
 
 ### Architecture 
@@ -13,6 +17,19 @@ Group: **DS-02**
 The file system has the following structure:  
 
 ![structure](https://github.com/DmitriyPodpryatov/ds-project-2/blob/main/scheme.png)
+
+### Description of Communication Protocols
+
+We used `Flask REST API` for all communication between nodes.
+
+The structure of request is as follows:
+
+1. Client sends a GET request of format `http://<namenode IP>/<command>` with specified parameters if needed.
+
+2. Namenode accepts a request, and depending on the command, either redirects a request to chosen datanodes or responses
+with a datanode or a list of datanodes for the client to contact to upload to or to download a file from.
+
+3. Datanode accepts a request, performs an action, and returns a response.
 
 ### How to Launch
 
@@ -108,15 +125,15 @@ dfs rmdir DIR - remove DIR
 * No `.` or `..` are allowed
 * No trailing `/` are allowed
 
-### Description of Communication Protocols
+## Contribution
+As you may check from history of commits in our repository, we have decided not to explicitly split the task and work separately, but take some different subtasks, do them and after some time, will test and resolve faced problems together.
+So, it is not easy for us to provide the particular distribution of responsibilities, since both of us contributes to each other task, but here the approximate list for both us:  
+**Dmitry:**
+- Docker part  
+- The first implementation of commands - touch, rm, rmdir, ls, cd, mkdir, copy   
+- A lot of bug fixes, testing, debugging and thinking  
 
-We used `Flask REST API` for all communication between nodes.
-
-The structure of request is as follows:
-
-1. Client sends a GET request of format `http://<namenode IP>/<command>` with specified parameters if needed.
-
-2. Namenode accepts a request, and depending on the command, either redirects a request to chosen datanodes or responses
-with a datanode or a list of datanodes for the client to contact to upload to or to download a file from.
-
-3. Datanode accepts a request, performs an action, and returns a response.
+**Lev:**
+- FileSystem class implementation  
+- The first implementation of commands - hello, init, read, write, info, move  
+- A lot of bug fixes, testing, debugging and thinking  
