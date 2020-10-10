@@ -79,7 +79,7 @@ def print_help():
     write FILE DEST_DIR - upload FILE into DEST_DIR
     rm FILE - remove FILE
     info FILE - show info about FILE
-    copy FILE DEST_DIR - copy FILE into DEST_DIR
+    copy SOURCE DEST - copy SOURCE into DEST
     move FILE DEST_DIR - move FILE into DEST_DIR
     cd DIR - open DIR
     ls DIR - list of files in DIR

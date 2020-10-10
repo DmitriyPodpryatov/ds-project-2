@@ -173,6 +173,7 @@ class FileSystem:
         """
         Delete node from file system
 
+        :param all_datanodes: all active datanodes
         :param path: absolute path to node
         """
         path = valid_path(path)
@@ -330,6 +331,7 @@ def read():
     # Get file name
     filename = request.args.get('filename')
     filename = valid_path(filename)
+
     global fs
     response = 'Failed'
 

@@ -86,7 +86,7 @@ dfs read FILE - download FILE
 dfs write FILE DEST_DIR - upload FILE into DEST_DIR
 dfs rm FILE - remove FILE
 dfs info FILE - show info about FILE
-dfs copy FILE DEST_DIR - copy FILE into DEST_DIR
+copy SOURCE DEST - copy SOURCE into DEST
 dfs move FILE DEST_DIR - move FILE into DEST_DIR
 dfs cd DIR - open DIR
 dfs ls DIR - list of files in DIR
