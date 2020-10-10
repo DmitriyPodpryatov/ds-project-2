@@ -167,7 +167,7 @@ class FileSystem:
         else:
             return False
 
-    def delete_node(self, path: str):
+    def delete_node(self, path: str, all_datanodes):
         """
         Delete node from file system
 
@@ -184,22 +184,33 @@ class FileSystem:
 
         response = "Failed"
         if current_node is not None:
-            # get list of datanodes where the node has been located
-            datanodes = current_node.location
-            # delete it from each
-            for datanode in datanodes:
-                # determine the type of the node we deleting
-                if current_node.is_dir:
-                    try:
-                        response = requests.get("http://" + datanode + "/rmdir", params={'dirname': path})
-                    except requests.exceptions.RequestException:
-                        pass
+            if not current_node.is_dir:
+                datanodes = current_node.location
+                for datanode in datanodes:
+                    if current_node.is_dir:
+                        try:
+                            response = requests.get("http://" + datanode + "/rmdir", params={'dirname': path})
+                        except requests.exceptions.RequestException:
+                            pass
 
-                else:
-                    try:
-                        response = requests.get("http://" + datanode + "/rm", params={'filename': path})
-                    except requests.exceptions.RequestException:
-                        pass
+                    else:
+                        try:
+                            response = requests.get("http://" + datanode + "/rm", params={'filename': path})
+                        except requests.exceptions.RequestException:
+                            pass
+            else:
+                for datanode in all_datanodes:
+                    if current_node.is_dir:
+                        try:
+                            response = requests.get("http://" + datanode + "/rmdir", params={'dirname': path})
+                        except requests.exceptions.RequestException:
+                            pass
+
+                    else:
+                        try:
+                            response = requests.get("http://" + datanode + "/rm", params={'filename': path})
+                        except requests.exceptions.RequestException:
+                            pass
 
             # pop the deleted node from parent list of children
             current_node.parent.children.pop(current_node.name)
@@ -392,7 +403,7 @@ def rm():
                 continue
 
         # Remove file from file system
-        fs.delete_node(path=filename)
+        fs.delete_node(path=filename, all_datanodes=datanodes)
 
     if type(response) == str:
         # response == 'Failed'
@@ -503,7 +514,7 @@ def move():
                 continue
 
         # Remove file from file system
-        fs.delete_node(moving_file)
+        fs.delete_node(moving_file, all_datanodes=datanodes)
 
         # Get new path
         temp_path = valid_path(moving_file)
@@ -650,7 +661,7 @@ def rmdir():
                     continue
 
             # Remove folder from file system
-            fs.delete_node(path=dirname)
+            fs.delete_node(path=dirname, all_datanodes=datanodes)
 
     if type(response) == str:
         # response == 'Failed'
