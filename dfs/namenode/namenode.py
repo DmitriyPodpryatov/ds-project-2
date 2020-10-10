@@ -84,25 +84,6 @@ class FileSystem:
 
         return current_node
 
-    def find_node(self, path: str):
-        """
-        The same as `get_node()`, but return location
-
-        :param path: absolute path to node
-        :return: list of datanodes
-        """
-        path = valid_path(path)
-
-        directories = path.split("/")[1:]
-        current_node = self.root
-
-        for dir in directories:
-            current_node = current_node.children.get(dir)
-
-        if current_node is not None:
-            return current_node.location
-        return []
-
     def has_children(self, path):
         """
         Check if a directory has children
@@ -137,23 +118,6 @@ class FileSystem:
         # Add node
         new_node = FileSystem.File(directories[-1], is_dir, parent=current_node, children={}, location=location)
         current_node.children.update({directories[-1]: new_node})
-
-    def update_location(self, path: str, location: str):
-        """
-        Update node's location
-
-        :param path: absolute path to node
-        :param location: list of datanodes where a node is present
-        """
-        path = valid_path(path)
-
-        directories = path.split('/')[1:]
-        current_node = self.root
-
-        for dir in directories:
-            current_node = current_node.children.get(dir)
-
-        current_node.location.append(location)
 
     def dir_exists(self, path: str):
         """
@@ -237,6 +201,7 @@ class FileSystem:
                     except requests.exceptions.RequestException:
                         pass
 
+            # pop the deleted node from parent list of children
             current_node.parent.children.pop(current_node.name)
 
             if type(response) == str:
