@@ -516,10 +516,13 @@ def move():
         # Remove file from file system
         fs.delete_node(moving_file, all_datanodes=datanodes)
 
-        # Get new path
-        temp_path = valid_path(moving_file)
-        new_filename = destination_dir + temp_path[temp_path.rfind('/'):]
-
+        if destination_dir != '/':
+            # Get new path
+            temp_path = valid_path(moving_file)
+            new_filename = destination_dir + temp_path[temp_path.rfind('/'):]
+        else:
+            temp_path = valid_path(moving_file)
+            new_filename = temp_path[temp_path.rfind('/'):]
         # Add file to file system
         fs.add_node(new_filename, is_dir=False, location=datanodes)
 

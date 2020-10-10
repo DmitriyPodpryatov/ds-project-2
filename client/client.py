@@ -25,7 +25,7 @@ def request(s: str, params=None, show=True, download=False, upload=False):
 
         # Download file
         if download and result.text != 'Failed':
-            data = requests.get(f'http://{result.text}/' + s, params=params).content
+            data = requests.get(f'http://{result.text}/' + s, params=params).text
 
             # Get file name
             filename = params['filename']
