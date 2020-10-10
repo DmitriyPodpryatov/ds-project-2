@@ -2,8 +2,8 @@ version: '3'
 
 services:
   namenode:
-    #    image:
-    build: .
+    image: dpodpryatov/ds-project-02:namenode
+#    build: .
     restart: on-failure
     ports:
       - 5555:5555

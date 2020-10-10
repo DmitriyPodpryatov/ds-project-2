@@ -6,65 +6,96 @@ Group: **DS-02**
 
 ## Distributed File System
 
-### Storage Servers aka Datanodes
+### How to Launch
 
-Copy `dfs/datanode` folder to the machine
-
-```
-scp -r dfs/datanode user@IP:
-```
-
-Or
+Clone repository to machines with private closed network
 
 ```
 git clone https://github.com/DmitriyPodpryatov/ds-project-2.git
+```
+
+Install [docker](https://docs.docker.com/engine/install/ubuntu/) and [docker-compose](https://docs.docker.com/compose/install/) on machines 
+
+#### Storage Servers aka Datanodes
+
+On server machines open folder with datanodes' files
+
+```
 cd ds-project-2/dfs/datanode
 ```
 
-Run
+Run this to start datanodes
 
 ```
-sudo docker-compose up --build
+sudo docker-compose up -d
 ```
 
-### Naming Server aka Namenode
-
-Copy `dfs/namenode` folder to the machine
+To access DFS on container, run
 
 ```
-scp -r dfs/namenode user@IP:
+sudo docker exec -it <container name> bash
+cd /dfs
 ```
 
-Or
+#### Naming Server aka Namenode
+
+On namenode machine open folder with namenode files
 
 ```
-git clone https://github.com/DmitriyPodpryatov/ds-project-2.git
 cd ds-project-2/dfs/namenode
 ```
 
-Run
+Run this to start namenode
 
 ```
-sudo  docker-compose up --build
+sudo docker-compose up -d
 ```
 
-### Client
+#### Client
 
-Copy `client` folder on the machine(s)
-
-```
-scp -r client user@IP:
-```
-
-Or
+On client machine open folder with client python script
 
 ```
-git clone https://github.com/DmitriyPodpryatov/ds-project-2.git
-cd client
+cd ds-project-2/client
 ```
 
-Run
+### How to Use
+
+Set up an alias for python script
 
 ```
-python3 client.py <args>
+alias dfs='python3 client.py'
+OR
+alias dfs='/home/<user>/ds-project-2/client/python3 client.py'
 ```
+
+Run commands by
+
+```
+dfs <args>
+```
+
+List of available commands:
+
+```
+dfs hello - get hello from namenode and active datanodes
+dfs help - list of all commands
+dfs init - initialize DFS and retun available space
+dfs touch FILE - create empty FILE
+dfs read FILE - download FILE
+dfs write FILE DEST_DIR - upload FILE into DEST_DIR
+dfs rm FILE - remove FILE
+dfs info FILE - show info about FILE
+dfs copy FILE DEST_DIR - copy FILE into DEST_DIR
+dfs move FILE DEST_DIR - move FILE into DEST_DIR
+dfs cd DIR - open DIR
+dfs ls DIR - list of files in DIR
+dfs mkdir DIR - create DIR
+dfs rmdir DIR - remove DIR
+```
+
+**Note:**
+
+* Use `/` for the root folder
+* No `.` or `..` are allowed
+* No trailing `/` are allowed

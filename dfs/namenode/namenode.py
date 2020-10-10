@@ -4,20 +4,47 @@ import requests
 
 
 def valid_path(path: str):
+    """
+    Add root '/' at the beginning if it is not present
+
+    :param path: path to file
+    :return: path with root '/' at the beginning
+    """
     if path[0] != '/':
-        # No root '/' => add '/' at the beginning
         path = '/' + path
 
     return path
 
 
 class FileSystem:
+    """
+    Keep track of file system in the namenode
+    """
+
     def __init__(self):
+        """
+        Initialize root folder
+
+        Set current directory to root (for `cd`)
+        """
         self.root = FileSystem.File('/', is_dir=True, children={})
         self.current_dir = self.root
 
     class File:
+        """
+        Nested class for files in file system
+        """
+
         def __init__(self, name: str, is_dir: bool, parent=None, children=None, location: [] = None):
+            """
+            Create file
+
+            :param name: absolute path
+            :param is_dir: directory flag
+            :param parent: parent directory
+            :param children: list of children files
+            :param location: list of datanodes where this file is present
+            """
             if children is None:
                 children = {}
 
@@ -28,33 +55,61 @@ class FileSystem:
             self.location = location
 
     def set_current_dir(self, path):
+        """
+        Change current directory (for `cd`)
+
+        :param path: new current directory
+        """
         if path == '/':
+            # Handle case with root directory
             self.current_dir = self.root
         else:
+            # Find directory and set as a current
             self.current_dir = self.get_node(path)
 
     def get_node(self, path: str):
+        """
+        Get node by path
+
+        :param path: absolute path to node
+        :return: File
+        """
         path = valid_path(path)
 
         directories = path.split("/")[1:]
         current_node = self.current_dir
+
         for dir in directories:
             current_node = current_node.children.get(dir)
 
         return current_node
 
     def find_node(self, path: str):
+        """
+        The same as `get_node()`, but return location
+
+        :param path: absolute path to node
+        :return: list of datanodes
+        """
         path = valid_path(path)
 
         directories = path.split("/")[1:]
         current_node = self.root
+
         for dir in directories:
             current_node = current_node.children.get(dir)
+
         if current_node is not None:
             return current_node.location
         return []
 
     def has_children(self, path):
+        """
+        Check if a directory has children
+
+        :param path: absolute path to directory
+        :return: whether a directory has children or not
+        """
         if self.dir_exists(path):
             node = self.get_node(path)
 
@@ -64,6 +119,13 @@ class FileSystem:
                 return False
 
     def add_node(self, path: str, is_dir: bool, location: list):
+        """
+        Add node to the file system
+
+        :param path: absolute path of a node
+        :param is_dir: directory flag
+        :param location: list of datanodes where this node is present
+        """
         path = valid_path(path)
 
         directories = path.split('/')[1:]
@@ -72,25 +134,40 @@ class FileSystem:
         for dir in directories[:-1]:
             current_node = current_node.children.get(dir)
 
+        # Add node
         new_node = FileSystem.File(directories[-1], is_dir, parent=current_node, children={}, location=location)
         current_node.children.update({directories[-1]: new_node})
 
     def update_location(self, path: str, location: str):
+        """
+        Update node's location
+
+        :param path: absolute path to node
+        :param location: list of datanodes where a node is present
+        """
         path = valid_path(path)
 
         directories = path.split('/')[1:]
         current_node = self.root
+
         for dir in directories:
             current_node = current_node.children.get(dir)
+
         current_node.location.append(location)
 
     def dir_exists(self, path: str):
+        """
+        Check whether a given directory exists or not
+
+        :param path: absolute path to directory
+        :return: whether a directory exists or not
+        """
         path = valid_path(path)
 
         directories = path.split("/")[1:]
         current_node = self.current_dir
 
-        # path == '/' => root is a directory
+        # path == '/' => root => is a directory
         if directories[0] == '':
             return True
 
@@ -103,15 +180,22 @@ class FileSystem:
             return False
 
     def file_exists(self, path: str):
+        """
+        Check whether a given file exists or not
+
+        :param path: absolute path to file
+        :return: whether a file exists or not
+        """
         path = valid_path(path)
 
         directories = path.split("/")[1:]
         current_node = self.current_dir
+
         for dir in directories:
             try:
                 current_node = current_node.children.get(dir)
             except AttributeError:
-                # No children => wrong path
+                # No children => wrong path. Need for `touch`
                 return None
 
         if current_node is not None and not current_node.is_dir:
@@ -120,12 +204,23 @@ class FileSystem:
             return False
 
     def delete_node(self, path: str, all_datanodes):
+        """
+        Delete node from file system
+
+        :param path: absolute path to node
+        :param all_datanodes: list of datanodes where node is present
+
+        TODO: add comments here
+        """
         path = valid_path(path)
+
         directories = path.split("/")[1:]
         current_node = self.current_dir
-        response = "Failed"
+
         for dir in directories:
             current_node = current_node.children.get(dir)
+
+        response = "Failed"
         if current_node is not None:
             if not current_node.is_dir:
                 datanodes = current_node.location
@@ -168,47 +263,78 @@ class FileSystem:
 
 app = Flask(__name__)
 CORS(app)
+
+# List of datanodes IP:PORT
 datanodes = ["10.0.15.11:7777", "10.0.15.12:7777", "10.0.15.13:7777"]
 
+# File system
 fs: FileSystem
 
 
 @app.route('/hello')
 def hello():
+    """
+    Check for active datanodes
+
+    :return: Response with hello from itself and all active datanodes
+    """
     res = "Hello from namenode!\n\n"
+
+    # Ask all datanodes
     for datanode in datanodes:
         res += requests.get("http://" + datanode + "/hello").text + "\n"
+
     return Response(status=200, response=res)
 
 
 @app.route('/init')
 def init():
+    """
+    Clear DFS
+
+    :return: Response with free space in MB
+    """
     global fs
     fs = FileSystem()
 
+    # Ask all datanodes for free space
     result = 0
+    active_datanodes = 0
     for datanode in datanodes:
         try:
             response = requests.get("http://" + datanode + "/init")
+
+            result += int(response.content)
+            active_datanodes += 1
         except requests.exceptions.RequestException:
             continue
-        result += int(response.content)
 
-    storage = "The available storage is " + str(round(result // len(datanodes) / (1024 * 1024), 2)) + " MB"
+    # Divide total space by number of active datanodes
+    try:
+        storage = "The available storage is " + str(round(result // len(datanodes) / (1024 * 1024), 2)) + " MB"
+    except ZeroDivisionError:
+        storage = "The available storage is 0 MB"
+
     return Response(status=200, response=storage)
 
 
 @app.route('/touch')
 def touch():
-    # Get params
+    """
+    Create empty file
+
+    :return: Response with acknowledgement
+    'Failed' if file system is not initialized, file already exists, or datanodes are not available
+    """
+    # Get file name
     filename = request.args.get('filename')
 
-    # Create file if it does not exists
     global fs
     response = 'Failed'
 
     # True (exists), False (doesn't exist), or None (error)
     exists = fs.file_exists(filename)
+    # Send request to all datanodes
     if fs and exists is not None and not exists:
         for datanode in datanodes:
             try:
@@ -216,7 +342,255 @@ def touch():
             except requests.exceptions.RequestException:
                 continue
 
+        # Add file to file system
         fs.add_node(path=filename, is_dir=False, location=datanodes)
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
+
+@app.route('/read')
+def read():
+    """
+    Redirect client to datanode to read (download) a file
+
+    :return: Response with datanode address
+    'Failed' if file system is not initialized, file does not exist, or datanodes are not available
+    """
+    # Get file name
+    filename = request.args.get('filename')
+
+    global fs
+    response = 'Failed'
+
+    file_exists = fs.file_exists(filename)
+    if file_exists:
+        # Get datanode with file
+        datanode = fs.get_node(filename).location[0]
+        return Response(status=200, response=datanode)
+    else:
+        return Response(status=200, response=response)
+
+
+@app.route('/write')
+def write():
+    """
+    Redirect client to datanodes to write (upload) a file
+
+    :return: Response with string with datanode addresses
+    'Failed' if file system is not initialized, destination folder does not exist, destination file already exists,
+    or datanodes are not available
+    """
+    # Get file name and destination folder
+    destination_dir = request.args.get('destination_dir')
+    filename = valid_path(request.args.get('filename'))
+    filename = filename[filename.rfind('/'):]
+
+    global fs
+    response = 'Failed'
+
+    # dir exists but file must not exist
+    dir_exists = fs.dir_exists(destination_dir)
+
+    if destination_dir != '/':
+        filename = destination_dir + filename
+    file_exists = fs.file_exists(filename)
+
+    global datanodes
+    if dir_exists and not file_exists:
+        # TODO: add comments
+        if destination_dir == '/':
+            nodes = '|'.join(datanodes)
+            fs.add_node(filename, is_dir=False, location=nodes)
+        else:
+            nodes = '|'.join(fs.get_node(destination_dir).location)
+            fs.add_node(filename, is_dir=False, location=fs.get_node(destination_dir).location)
+        return Response(status=200, response=nodes)
+    else:
+        return Response(status=200, response=response)
+
+
+@app.route('/rm')
+def rm():
+    """
+    Remove file
+
+    :return: Response with acknowledgement
+    'Failed' if file system is not initialized, file does not exist, or datanodes are not available
+    """
+    # Get file name
+    filename = request.args.get('filename')
+
+    global fs
+    response = 'Failed'
+
+    file_exists = fs.file_exists(filename)
+    # Send request to all datanodes
+    if fs is not None and file_exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/rm", params={'filename': filename})
+            except requests.exceptions.RequestException:
+                continue
+
+        # Remove file from file system
+        fs.delete_node(path=filename, all_datanodes=datanodes)
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
+
+@app.route('/info')
+def info():
+    """
+    Show file info
+
+    :return: Response with file info
+    'Failed' if file system is not initialized, file does not exist, or datanodes are not available
+    """
+    # Get file name
+    filename = request.args.get('filename')
+
+    global fs
+    response = 'Failed'
+
+    file_exists = fs.file_exists(filename)
+    # Send request to all datanodes
+    if fs is not None and file_exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/info", params={'filename': filename})
+            except requests.exceptions.RequestException:
+                continue
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
+
+@app.route('/copy')
+def copy():
+    """
+    Copy file
+
+    :return: Response with acknowledgement
+    'Failed' if file system is not initialized, file does not exist, destination folder does not exist,
+    or datanodes are not available
+    """
+    # Get file name and destination folder
+    source = request.args.get('source')
+    destination = request.args.get('destination')
+
+    global fs
+    response = 'Failed'
+
+    file_exists = fs.file_exists(source)
+    dest_dir_exists = True
+    # Get destination folder and whether it exists
+    if destination.rfind('/') != -1 and destination.rfind('/') != 0:
+        destination_dir = destination[0:destination.rfind('/')]
+        dest_dir_exists = fs.dir_exists(destination_dir)
+
+    # Send request to all datanodes
+    if fs is not None and file_exists and dest_dir_exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/copy",
+                                        params={'source': source, 'destination': destination})
+            except requests.exceptions.RequestException:
+                continue
+
+        # Add file to file system
+        fs.add_node(path=destination, is_dir=False, location=datanodes)
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
+
+@app.route('/move')
+def move():
+    """
+    Move (cut and paste) file
+
+    :return: Response with acknowledgement
+    'Failed' if file system is not initialized, file already exists, or datanodes are not available
+    """
+    # Get file name and destination folder
+    moving_file = request.args.get('filename')
+    destination_dir = request.args.get('destination_dir')
+
+    global fs
+    response = 'Failed'
+
+    file_exists = fs.file_exists(moving_file)
+    dest_dir_exists = fs.dir_exists(destination_dir)
+    # Send request to all datanodes
+    if fs is not None and file_exists and dest_dir_exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/move",
+                                        params={'filename': moving_file, 'destination_dir': destination_dir})
+            except requests.exceptions.RequestException:
+                continue
+
+        # Remove file from file system
+        fs.delete_node(moving_file, datanodes)
+
+        # Get new path
+        temp_path = valid_path(moving_file)
+        new_filename = destination_dir + temp_path[temp_path.rfind('/'):]
+
+        # Add file to file system
+        fs.add_node(new_filename, is_dir=False, location=datanodes)
+
+    if type(response) == str:
+        # response == 'Failed'
+        return Response(status=200, response=response)
+    else:
+        # response == Response object
+        return Response(status=200, response=response.content)
+
+
+@app.route('/cd')
+def cd():
+    """
+    Change directory
+
+    :return: Response with acknowledgement
+    'Failed' if file system is not initialized, directory does not exist, or datanodes are not available
+    """
+    # Get folder name
+    dirname = request.args.get('dirname')
+
+    global fs
+    response = 'Failed'
+
+    dir_exists = fs.dir_exists(dirname)
+    # Send request to all datanodes
+    if fs is not None and dir_exists:
+        for datanode in datanodes:
+            try:
+                response = requests.get("http://" + datanode + "/cd", params={'dirname': dirname})
+            except requests.exceptions.RequestException:
+                continue
+
+        # Change file system's current directory
+        fs.set_current_dir(dirname)
 
     if type(response) == str:
         # response == 'Failed'
@@ -228,13 +602,20 @@ def touch():
 
 @app.route('/ls')
 def ls():
-    # Get params
+    """
+    List files in directory
+
+    :return: Response with string of files in directory
+    'Failed' if file system is not initialized, directory does not exist, or datanodes are not available
+    """
+    # Get folder name
     dirname = request.args.get('dirname')
 
     global fs
     response = 'Failed'
 
     dir_exists = fs.dir_exists(dirname)
+    # Send request to all datanodes
     if fs is not None and dir_exists:
         for datanode in datanodes:
             try:
@@ -252,109 +633,29 @@ def ls():
 
 @app.route('/mkdir')
 def mkdir():
-    # Get params
-    dirname = request.args.get('dirname')
+    """
+    Create empty directory
 
-    # Create file if it does not exists
-    global fs
-    response = 'Failed'
-
-    # True (exists), False (doesn't exist), or None (error)
-    exists = fs.dir_exists(dirname)
-
-    if fs is not None and not exists:
-        for datanode in datanodes:
-            try:
-                response = requests.get("http://" + datanode + "/mkdir", params={'dirname': dirname})
-            except requests.exceptions.RequestException:
-                continue
-
-        fs.add_node(path=dirname, is_dir=True, location=datanodes)
-
-    if type(response) == str:
-        # response == 'Failed'
-        return Response(status=200, response=response)
-    else:
-        # response == Response object
-        return Response(status=200, response=response.content)
-
-
-@app.route('/cd')
-def cd():
-    # Get params
+    :return: Response with acknowledgement
+    'Failed' if file system is not initialized, directory does not exist, or datanodes are not available
+    """
+    # Get folder name
     dirname = request.args.get('dirname')
 
     global fs
     response = 'Failed'
 
     dir_exists = fs.dir_exists(dirname)
-    if fs is not None and dir_exists:
+    # Send request to all datanodes
+    if fs is not None and not dir_exists:
         for datanode in datanodes:
             try:
-                response = requests.get("http://" + datanode + "/cd", params={'dirname': dirname})
+                response = requests.get("http://" + datanode + "/mkdir", params={'dirname': dirname})
             except requests.exceptions.RequestException:
                 continue
 
-        fs.set_current_dir(dirname)
-
-    if type(response) == str:
-        # response == 'Failed'
-        return Response(status=200, response=response)
-    else:
-        # response == Response object
-        return Response(status=200, response=response.content)
-
-
-@app.route('/copy')
-def copy():
-    source = request.args.get('source')
-    destination = request.args.get('destination')
-    global fs
-    response = 'Failed'
-    file_exists = fs.file_exists(source)
-    dest_dir_exists = True
-    if destination.rfind('/') != -1 and destination.rfind('/') != 0:
-        destination_dir = destination[0:destination.rfind('/')]
-        dest_dir_exists = fs.dir_exists(destination_dir)
-
-    # if File System is initialized and source file exists and destination directory exists
-    if fs is not None and file_exists and dest_dir_exists:
-        for datanode in datanodes:
-            try:
-                response = requests.get("http://" + datanode + "/copy",
-                                        params={'source': source, 'destination': destination})
-            except requests.exceptions.RequestException:
-                continue
-
-        fs.add_node(path=destination, is_dir=False, location=datanodes)
-
-    if type(response) == str:
-        # response == 'Failed'
-        return Response(status=200, response=response)
-    else:
-        # response == Response object
-        return Response(status=200, response=response.content)
-
-
-@app.route('/rm')
-def rm():
-    # Get params
-    filename = request.args.get('filename')
-
-    # Create file if it does not exists
-    global fs
-    response = 'Failed'
-
-    # True (exists), False (doesn't exist), or None (error)
-    file_exists = fs.file_exists(filename)
-    if fs is not None and file_exists:
-        for datanode in datanodes:
-            try:
-                response = requests.get("http://" + datanode + "/rm", params={'filename': filename})
-            except requests.exceptions.RequestException:
-                continue
-
-        fs.delete_node(path=filename, all_datanodes=datanodes)
+        # Add directory to file system
+        fs.add_node(path=dirname, is_dir=True, location=datanodes)
 
     if type(response) == str:
         # response == 'Failed'
@@ -366,6 +667,12 @@ def rm():
 
 @app.route('/rmdir')
 def rmdir():
+    """
+    Remove directory. Ask for permission if directory is not empty
+
+    :return:
+    'Failed' if file system is not initialized, directory does not exist, or datanodes are not available
+    """
     # Get params
     dirname = request.args.get('dirname')
     ack = request.args.get('ack')
@@ -375,10 +682,12 @@ def rmdir():
 
     dir_exists = fs.dir_exists(dirname)
     if fs is not None and dir_exists:
-
+        # Folder is not empty and there is no acknowledgement from client => ask client for permission
         if fs.has_children(dirname) and ack is None:
             return Response(status=200, response='nonempty')
 
+        # Either folder is empty or request has acknowledgement
+        # Send request to all datanodes
         if not fs.has_children(dirname) or ack == 'y':
             for datanode in datanodes:
                 try:
@@ -386,111 +695,8 @@ def rmdir():
                 except requests.exceptions.RequestException:
                     continue
 
+            # Remove folder from file system
             fs.delete_node(path=dirname, all_datanodes=datanodes)
-
-    if type(response) == str:
-        # response == 'Failed'
-        return Response(status=200, response=response)
-    else:
-        # response == Response object
-        return Response(status=200, response=response.content)
-
-
-@app.route('/move')
-def move():
-    moving_file = request.args.get('filename')
-    destination_dir = request.args.get('destination_dir')
-    global fs
-    response = 'Failed'
-    file_exists = fs.file_exists(moving_file)
-    dest_dir_exists = fs.dir_exists(destination_dir)
-
-    # if File System is initialized and source file exists and destination directory exists
-    if fs is not None and file_exists and dest_dir_exists:
-        for datanode in datanodes:
-            try:
-                response = requests.get("http://" + datanode + "/move",
-                                        params={'filename': moving_file, 'destination_dir': destination_dir})
-            except requests.exceptions.RequestException:
-                continue
-        fs.delete_node(moving_file, datanodes)
-        temp_path = valid_path(moving_file)
-        new_filename = destination_dir + temp_path[temp_path.rfind('/'):]
-        fs.add_node(new_filename, is_dir=False, location=datanodes)
-
-    if type(response) == str:
-        # response == 'Failed'
-        return Response(status=200, response=response)
-    else:
-        # response == Response object
-        return Response(status=200, response=response.content)
-
-
-@app.route('/read')
-def read():
-    # Get params
-    filename = request.args.get('filename')
-
-    # Create file if it does not exists
-    global fs
-    response = 'Failed'
-
-    # True (exists), False (doesn't exist), or None (error)
-    file_exists = fs.file_exists(filename)
-    if file_exists:
-        datanode = fs.get_node(filename).location[0]
-        return Response(status=200, response=datanode)
-    else:
-        return Response(status=200, response=response)
-
-
-@app.route('/write')
-def write():
-    # Get params
-    destination_dir = request.args.get('destination_dir')
-    filename = valid_path(request.args.get('filename'))
-    filename = filename[filename.rfind('/'):]
-
-    # Create file if it does not exists
-    global fs
-    response = 'Failed'
-
-    # dir exists but file must not exist
-    dir_exists = fs.dir_exists(destination_dir)
-
-    if destination_dir != '/':
-        filename = destination_dir + filename
-    file_exists = fs.file_exists(filename)
-    global datanodes
-    if dir_exists and not file_exists:
-        if destination_dir == '/':
-            nodes = '|'.join(datanodes)
-            fs.add_node(filename, is_dir=False, location=nodes)
-        else:
-            nodes = '|'.join(fs.get_node(destination_dir).location)
-            fs.add_node(filename, is_dir=False, location=fs.get_node(destination_dir).location)
-        return Response(status=200, response=nodes)
-    else:
-        return Response(status=200, response=response)
-
-
-@app.route('/info')
-def info():
-    # Get params
-    filename = request.args.get('filename')
-
-    # Create file if it does not exists
-    global fs
-    response = 'Failed'
-
-    exists = fs.file_exists(filename)
-
-    if fs is not None and exists:
-        for datanode in datanodes:
-            try:
-                response = requests.get("http://" + datanode + "/info", params={'filename': filename})
-            except requests.exceptions.RequestException:
-                continue
 
     if type(response) == str:
         # response == 'Failed'
