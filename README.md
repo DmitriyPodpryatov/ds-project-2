@@ -94,7 +94,7 @@ dfs read FILE - download FILE
 dfs write FILE DEST_DIR - upload FILE into DEST_DIR
 dfs rm FILE - remove FILE
 dfs info FILE - show info about FILE
-copy SOURCE DEST - copy SOURCE into DEST
+dfs copy SOURCE DEST - copy SOURCE into DEST
 dfs move FILE DEST_DIR - move FILE into DEST_DIR
 dfs cd DIR - open DIR
 dfs ls DIR - list of files in DIR
@@ -107,3 +107,16 @@ dfs rmdir DIR - remove DIR
 * Use `/` for the root folder
 * No `.` or `..` are allowed
 * No trailing `/` are allowed
+
+### Description of Communication Protocols
+
+We used `Flask REST API` for all communication between nodes.
+
+The structure of request is as follows:
+
+1. Client sends a GET request of format `http://<namenode IP>/<command>` with specified parameters if needed.
+
+2. Namenode accepts a request, and depending on the command, either redirects a request to chosen datanodes or responses
+with a datanode or a list of datanodes for the client to contact to upload to or to download a file from.
+
+3. Datanode accepts a request, performs an action, and returns a response.
