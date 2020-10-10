@@ -327,7 +327,7 @@ def read():
     """
     # Get file name
     filename = request.args.get('filename')
-
+    filename = valid_path(filename)
     global fs
     response = 'Failed'
 
@@ -522,7 +522,7 @@ def move():
             new_filename = destination_dir + temp_path[temp_path.rfind('/'):]
         else:
             temp_path = valid_path(moving_file)
-            new_filename = temp_path[temp_path.rfind('/'):]
+            new_filename = temp_path[temp_path.rfind('/')+1:]
         # Add file to file system
         fs.add_node(new_filename, is_dir=False, location=datanodes)
 

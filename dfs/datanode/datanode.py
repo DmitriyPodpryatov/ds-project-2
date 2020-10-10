@@ -57,10 +57,14 @@ def read():
     filename = base_path + '/' + request.args.get('filename')
 
     # Read data and send it
-    with open(filename, 'rb') as fp:
-        data = fp.read()
+    try:
+        with open(filename, 'rb') as fp:
+            data = fp.read()
+        return Response(status=200, response=data)
+    except BaseException:
+        return Response(status=400, response="Failed to open file")
 
-    return Response(status=200, response=data)
+
 
 
 @app.route('/write', methods=['GET', 'POST'])
