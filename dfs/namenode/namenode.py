@@ -220,11 +220,11 @@ class FileSystem:
 
         response = "Failed"
         if current_node is not None:
-            # determine the type of the node we deleting
             # get list of datanodes where the node has been located
             datanodes = current_node.location
             # delete it from each
             for datanode in datanodes:
+                # determine the type of the node we deleting
                 if current_node.is_dir:
                     try:
                         response = requests.get("http://" + datanode + "/rmdir", params={'dirname': path})
@@ -394,7 +394,7 @@ def write():
         # since, technically, root has no FileSystem object and therefore will not have location attribute
         if destination_dir == '/':
             nodes = '|'.join(datanodes)
-            fs.add_node(filename, is_dir=False, location=nodes)
+            fs.add_node(filename, is_dir=False, location=datanodes)
         else:
             nodes = '|'.join(fs.get_node(destination_dir).location)
             fs.add_node(filename, is_dir=False, location=fs.get_node(destination_dir).location)
